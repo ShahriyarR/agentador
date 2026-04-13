@@ -73,7 +73,7 @@ _SUPPRESS_HINT_TUI = "Use /notifications to manage warnings."
 """Suppression hint for TUI toasts, referencing the in-app settings screen."""
 
 _SUPPRESS_HINT_CLI = (
-    'To suppress, edit ~/.deepagents/config.toml:\n\\[warnings]\nsuppress = \\["<key>"]'
+    'To suppress, edit ~/.agent-tui/config.toml:\n\\[warnings]\nsuppress = \\["<key>"]'
 )
 """Suppression hint for non-interactive CLI output.
 
@@ -130,7 +130,7 @@ def check_optional_tools(*, config_path: Path | None = None) -> list[str]:
     Args:
         config_path: Path to config file.
 
-            Defaults to `~/.deepagents/config.toml`.
+            Defaults to `~/.agent-tui/config.toml`.
 
     Returns:
         List of missing tool names (e.g. `["ripgrep"]`).
@@ -1218,7 +1218,7 @@ def cli_main() -> None:
 
     # Note: LANGSMITH_PROJECT override is handled lazily by config.py's
     # _ensure_bootstrap() (triggered on first access of `settings`).
-    # This ensures agent traces use DEEPAGENTS_CLI_LANGSMITH_PROJECT while
+    # This ensures agent traces use AGENT_TUI_LANGSMITH_PROJECT while
     # shell commands use the user's original LANGSMITH_PROJECT.
 
     # Fast path: print version without loading heavy dependencies
@@ -1435,7 +1435,7 @@ def cli_main() -> None:
             else:
                 console.print(
                     "[bold red]Error:[/bold red] Could not clear default model. "
-                    "Check permissions for ~/.deepagents/"
+                    "Check permissions for ~/.agent-tui/"
                 )
                 sys.exit(1)
             sys.exit(0)
@@ -1470,7 +1470,7 @@ def cli_main() -> None:
             else:
                 console.print(
                     "[bold red]Error:[/bold red] Could not save default model. "
-                    "Check permissions for ~/.deepagents/"
+                    "Check permissions for ~/.agent-tui/"
                 )
                 sys.exit(1)
             sys.exit(0)

@@ -31,7 +31,7 @@ class NotificationSettingsScreen(ModalScreen[None]):
     """Modal dialog for managing startup warning preferences.
 
     Each checkbox maps to a key in `[warnings].suppress` in
-    `~/.deepagents/config.toml`. Toggling a checkbox immediately
+    `~/.agent-tui/config.toml`. Toggling a checkbox immediately
     persists the change.
     """
 
@@ -143,7 +143,7 @@ class NotificationSettingsScreen(ModalScreen[None]):
             if not ok:
                 self.app.notify(
                     "Could not save notification preference. "
-                    "Check file permissions for ~/.deepagents/config.toml.",
+                    "Check file permissions for ~/.agent-tui/config.toml.",
                     severity="warning",
                     timeout=6,
                     markup=False,

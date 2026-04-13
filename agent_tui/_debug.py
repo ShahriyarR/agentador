@@ -1,6 +1,6 @@
 """Shared debug-logging configuration for verbose file-based tracing.
 
-When the `DEEPAGENTS_CLI_DEBUG` environment variable is set, modules that handle
+When the `AGENT_TUI_DEBUG` environment variable is set, modules that handle
 streaming or remote communication can enable detailed file-based logging. This
 helper centralizes the setup so the env-var name, file path, and format are
 defined in one place.
@@ -16,13 +16,13 @@ from agent_tui._env_vars import DEBUG, DEBUG_FILE
 
 
 def configure_debug_logging(target: logging.Logger) -> None:
-    """Attach a file handler to *target* when `DEEPAGENTS_CLI_DEBUG` is set.
+    """Attach a file handler to *target* when `AGENT_TUI_DEBUG` is set.
 
     The log file defaults to `'/tmp/deepagents_debug.log'` but can be overridden
-    with `DEEPAGENTS_CLI_DEBUG_FILE`. The handler appends so that multiple
+    with `AGENT_TUI_DEBUG_FILE`. The handler appends so that multiple
     modules share the same log file across a session.
 
-    Does nothing when `DEEPAGENTS_CLI_DEBUG` is not set.
+    Does nothing when `AGENT_TUI_DEBUG` is not set.
 
     Args:
         target: Logger to configure.

@@ -1,17 +1,8 @@
-"""Version information and lightweight constants for `deepagents-cli`."""
+"""Version and metadata constants."""
 
-__version__ = "0.0.37"  # x-release-please-version
+__version__ = "0.1.0"
 
-DOCS_URL = "https://docs.langchain.com/oss/python/deepagents/cli"
-"""URL for `deepagents-cli` documentation."""
-
-PYPI_URL = "https://pypi.org/pypi/deepagents-cli/json"
-"""PyPI JSON API endpoint for version checks."""
-
-CHANGELOG_URL = (
-    "https://github.com/langchain-ai/deepagents/blob/main/libs/cli/CHANGELOG.md"
-)
-"""URL for the full changelog."""
-
-USER_AGENT = f"deepagents-cli/{__version__} update-check"
-"""User-Agent header sent with PyPI requests."""
+DOCS_URL = "https://github.com/agent-tui/agent-tui"
+PYPI_PROJECT = "agent-tui"
+PYPI_URL = f"https://pypi.org/pypi/{PYPI_PROJECT}/json"
+USER_AGENT = f"agent-tui/{__version__}"

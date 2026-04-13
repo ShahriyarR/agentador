@@ -42,9 +42,9 @@ def _default_history_path() -> Path:
     """Return the default history file path.
 
     Extracted as a function so tests can monkeypatch it to a temp path,
-    preventing test runs from polluting `~/.deepagents/history.jsonl`.
+    preventing test runs from polluting `~/.agent-tui/history.jsonl`.
     """
-    return Path.home() / ".deepagents" / "history.jsonl"
+    return Path.home() / ".agent-tui" / "history.jsonl"
 
 
 _PASTE_BURST_CHAR_GAP_SECONDS = 0.03
@@ -928,7 +928,7 @@ class ChatInput(Vertical):
 
         Args:
             cwd: Current working directory for file completion
-            history_file: Path to history file (default: ~/.deepagents/history.jsonl)
+            history_file: Path to history file (default: ~/.agent-tui/history.jsonl)
             image_tracker: Optional tracker for attached images
             **kwargs: Additional arguments for parent
         """

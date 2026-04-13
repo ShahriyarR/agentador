@@ -236,7 +236,7 @@ def get_db_path() -> Path:
     global _db_path  # noqa: PLW0603  # Module-level cache requires global statement
     if _db_path is not None:
         return _db_path
-    db_dir = Path.home() / ".deepagents"
+    db_dir = Path.home() / ".agent-tui"
     db_dir.mkdir(parents=True, exist_ok=True)
     _db_path = db_dir / "sessions.db"
     return _db_path
@@ -1084,12 +1084,12 @@ async def list_threads_command(
             the default.
         sort_by: Sort field — `"updated"` or `"created"`.
 
-            When `None`, reads from config (`~/.deepagents/config.toml`).
+            When `None`, reads from config (`~/.agent-tui/config.toml`).
         branch: Only show threads from this git branch.
         verbose: When `True`, show all columns (branch, created, prompt).
         relative: Show timestamps as relative time (e.g., '5m ago').
 
-            When `None`, reads from config (`~/.deepagents/config.toml`).
+            When `None`, reads from config (`~/.agent-tui/config.toml`).
         output_format: Output format — `'text'` (Rich) or `'json'`.
     """
     from agent_tui.model_config import (

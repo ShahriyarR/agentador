@@ -181,7 +181,7 @@ def _load_theme_preference() -> str:
 
 
 def save_theme_preference(name: str) -> bool:
-    """Persist theme preference to `~/.deepagents/config.toml`.
+    """Persist theme preference to `~/.agent-tui/config.toml`.
 
     Args:
         name: Textual theme name to save.
@@ -4836,7 +4836,7 @@ class DeepAgentsApp(App):
                     if env_var
                     else (
                         f"provider '{provider}' is not recognized. "
-                        "Add it to ~/.deepagents/config.toml with an "
+                        "Add it to ~/.agent-tui/config.toml with an "
                         "api_key_env field"
                     )
                 )
@@ -4893,7 +4893,7 @@ class DeepAgentsApp(App):
                 await self._mount_message(
                     ErrorMessage(
                         "Model switched for this session, but could not save "
-                        "preference. Check permissions for ~/.deepagents/"
+                        "preference. Check permissions for ~/.agent-tui/"
                     )
                 )
             else:
@@ -4909,7 +4909,7 @@ class DeepAgentsApp(App):
     async def _set_default_model(self, model_spec: str) -> None:
         """Set the default model in config without switching the current session.
 
-        Updates `[models].default` in `~/.deepagents/config.toml` so that
+        Updates `[models].default` in `~/.agent-tui/config.toml` so that
         future CLI launches use this model. Does not affect the running session.
 
         Args:
@@ -4931,7 +4931,7 @@ class DeepAgentsApp(App):
         else:
             await self._mount_message(
                 ErrorMessage(
-                    "Could not save default model. Check permissions for ~/.deepagents/"
+                    "Could not save default model. Check permissions for ~/.agent-tui/"
                 )
             )
 
@@ -4954,7 +4954,7 @@ class DeepAgentsApp(App):
             await self._mount_message(
                 ErrorMessage(
                     "Could not clear default model. "
-                    "Check permissions for ~/.deepagents/"
+                    "Check permissions for ~/.agent-tui/"
                 )
             )
 

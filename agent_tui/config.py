@@ -70,11 +70,11 @@ def _find_dotenv_from_start_path(start_path: Path) -> Path | None:
     return None
 
 
-# Global user-level .env (~/.deepagents/.env); sentinel when Path.home() fails.
+# Global user-level .env (~/.agent-tui/.env); sentinel when Path.home() fails.
 try:
-    _GLOBAL_DOTENV_PATH = Path.home() / ".deepagents" / ".env"
+    _GLOBAL_DOTENV_PATH = Path.home() / ".agent-tui" / ".env"
 except RuntimeError:
-    _GLOBAL_DOTENV_PATH = Path("/nonexistent/.deepagents/.env")
+    _GLOBAL_DOTENV_PATH = Path("/nonexistent/.agent-tui/.env")
 
 
 def _load_dotenv(*, start_path: Path | None = None) -> bool:
@@ -83,7 +83,7 @@ def _load_dotenv(*, start_path: Path | None = None) -> bool:
     Loads in order (first write wins, `override=False`):
 
     1. Project/CWD `.env` — project-specific values
-    2. `~/.deepagents/.env` — global user defaults
+    2. `~/.agent-tui/.env` — global user defaults
 
     Both layers use `override=False` (the python-dotenv default) so that
     shell-exported variables always take precedence over dotenv files.
@@ -96,7 +96,7 @@ def _load_dotenv(*, start_path: Path | None = None) -> bool:
     !!! note
 
         To scope credentials to the CLI without colliding with
-        identically-named shell exports, use the `DEEPAGENTS_CLI_` env-var
+        identically-named shell exports, use the `AGENT_TUI_` env-var
         prefix (see `resolve_env_var` in `agent_tui.model_config`).
 
     Args:
@@ -129,7 +129,7 @@ def _load_dotenv(*, start_path: Path | None = None) -> bool:
             exc_info=True,
         )
 
-    # 2. Global (~/.deepagents/.env) — fills in any vars not already set by
+    # 2. Global (~/.agent-tui/.env) — fills in any vars not already set by
     # the shell or the project dotenv.
     # try/except wraps both is_file() and load_dotenv() to cover the TOCTOU
     # window where the file can vanish between stat and open.
@@ -195,7 +195,7 @@ def _ensure_bootstrap() -> None:
             # Propagate prefixed LangSmith env vars to canonical names.
             # The CLI resolves prefixed vars via resolve_env_var(), but the
             # LangSmith SDK reads os.environ directly and has no knowledge
-            # of the DEEPAGENTS_CLI_ prefix. Setting canonical vars here
+            # of the AGENT_TUI_ prefix. Setting canonical vars here
             # bridges that gap.
             from agent_tui.model_config import _ENV_PREFIX
 
@@ -397,7 +397,7 @@ def _resolve_editable_info() -> tuple[bool, str | None]:
     path: str | None = None
 
     try:
-        dist = distribution("deepagents-cli")
+        dist = distribution("agent-tui")
         raw = dist.read_text("direct_url.json")
         if raw:
             data = json.loads(raw)
@@ -659,13 +659,13 @@ def build_stream_config(
         cwd = ""
 
     # Include SDK version alongside CLI version — see docstring for why.
-    versions: dict[str, str] = {"deepagents-cli": __version__}
+    versions: dict[str, str] = {"agent-tui": __version__}
     with contextlib.suppress(importlib_metadata.PackageNotFoundError):
         versions["deepagents"] = importlib_metadata.version("deepagents")
 
     metadata: dict[str, Any] = {
         "versions": versions,
-        "ls_integration": "deepagents-cli",
+        "ls_integration": "agent-tui",
     }
     from agent_tui._env_vars import USER_ID
 
@@ -767,7 +767,7 @@ def parse_shell_allow_list(allow_list_str: str | None) -> list[str] | None:
 
 
 def _read_config_toml_skills_dirs() -> list[str] | None:
-    """Read `[skills].extra_allowed_dirs` from `~/.deepagents/config.toml`.
+    """Read `[skills].extra_allowed_dirs` from `~/.agent-tui/config.toml`.
 
     Returns:
         List of path strings, or `None` if the key is absent or the file
@@ -811,14 +811,14 @@ def _parse_extra_skills_dirs(
     in user-specified locations without being rejected by the path
     containment check.
 
-    The env var (`DEEPAGENTS_CLI_EXTRA_SKILLS_DIRS`, colon-separated) takes
+    The env var (`AGENT_TUI_EXTRA_SKILLS_DIRS`, colon-separated) takes
     precedence: when set, `config.toml` values are ignored.
 
     Args:
-        env_raw: Value of `DEEPAGENTS_CLI_EXTRA_SKILLS_DIRS` (colon-separated), or
+        env_raw: Value of `AGENT_TUI_EXTRA_SKILLS_DIRS` (colon-separated), or
             `None` if unset.
         config_toml_dirs: List of path strings from
-            `[skills].extra_allowed_dirs` in `~/.deepagents/config.toml`.
+            `[skills].extra_allowed_dirs` in `~/.agent-tui/config.toml`.
 
     Returns:
         List of resolved `Path` objects, or `None` if not configured.
@@ -905,8 +905,8 @@ class Settings:
     locations without being rejected by the containment check
     in `load_skill_content`.
 
-    Set via `DEEPAGENTS_CLI_EXTRA_SKILLS_DIRS` env var (colon-separated) or
-    `[skills].extra_allowed_dirs` in `~/.deepagents/config.toml`.
+    Set via `AGENT_TUI_EXTRA_SKILLS_DIRS` env var (colon-separated) or
+    `[skills].extra_allowed_dirs` in `~/.agent-tui/config.toml`.
     """
 
     @classmethod
@@ -930,7 +930,7 @@ class Settings:
         google_cloud_project = resolve_env_var("GOOGLE_CLOUD_PROJECT")
 
         # Detect LangSmith configuration
-        # DEEPAGENTS_CLI_LANGSMITH_PROJECT: Project for deepagents agent tracing
+        # AGENT_TUI_LANGSMITH_PROJECT: Project for deepagents agent tracing
         # user_langchain_project: User's ORIGINAL LANGSMITH_PROJECT (before override)
         # When accessed via the module-level `settings` singleton,
         # _ensure_bootstrap() has already run and may have overridden
@@ -995,8 +995,8 @@ class Settings:
 
             `.env` files are loaded with `override=False`, so shell-exported
             variables always take precedence.  To override a shell-exported key
-            from `.env`, use the `DEEPAGENTS_CLI_` prefix (e.g.
-            `DEEPAGENTS_CLI_OPENAI_API_KEY`).
+            from `.env`, use the `AGENT_TUI_` prefix (e.g.
+            `AGENT_TUI_OPENAI_API_KEY`).
 
         Args:
             start_path: Directory to start project detection from (defaults to cwd).
@@ -1148,12 +1148,12 @@ class Settings:
 
     @property
     def user_deepagents_dir(self) -> Path:
-        """Get the base user-level .deepagents directory.
+        """Get the base user-level .agent-tui directory.
 
         Returns:
-            Path to ~/.deepagents
+            Path to ~/.agent-tui
         """
-        return Path.home() / ".deepagents"
+        return Path.home() / ".agent-tui"
 
     @staticmethod
     def get_user_agent_md_path(agent_name: str) -> Path:
@@ -1165,17 +1165,17 @@ class Settings:
             agent_name: Name of the agent
 
         Returns:
-            Path to ~/.deepagents/{agent_name}/AGENTS.md
+            Path to ~/.agent-tui/{agent_name}/AGENTS.md
         """
-        return Path.home() / ".deepagents" / agent_name / "AGENTS.md"
+        return Path.home() / ".agent-tui" / agent_name / "AGENTS.md"
 
     def get_project_agent_md_path(self) -> list[Path]:
         """Get project-level AGENTS.md paths.
 
-        Checks both `{project_root}/.deepagents/AGENTS.md` and
+        Checks both `{project_root}/.agent-tui/AGENTS.md` and
         `{project_root}/AGENTS.md`, returning all that exist. If both are
         present, both are loaded and their instructions are combined, with
-        `.deepagents/AGENTS.md` first.
+        `.agent-tui/AGENTS.md` first.
 
         Returns:
             Existing AGENTS.md paths.
@@ -1209,7 +1209,7 @@ class Settings:
             agent_name: Name of the agent
 
         Returns:
-            Path to ~/.deepagents/{agent_name}
+            Path to ~/.agent-tui/{agent_name}
 
         Raises:
             ValueError: If the agent name contains invalid characters.
@@ -1220,7 +1220,7 @@ class Settings:
                 "contain letters, numbers, hyphens, underscores, and spaces."
             )
             raise ValueError(msg)
-        return Path.home() / ".deepagents" / agent_name
+        return Path.home() / ".agent-tui" / agent_name
 
     def ensure_agent_dir(self, agent_name: str) -> Path:
         """Ensure the global agent directory exists and return its path.
@@ -1229,7 +1229,7 @@ class Settings:
             agent_name: Name of the agent
 
         Returns:
-            Path to ~/.deepagents/{agent_name}
+            Path to ~/.agent-tui/{agent_name}
 
         Raises:
             ValueError: If the agent name contains invalid characters.
@@ -1251,7 +1251,7 @@ class Settings:
             agent_name: Name of the agent
 
         Returns:
-            Path to ~/.deepagents/{agent_name}/skills/
+            Path to ~/.agent-tui/{agent_name}/skills/
         """
         return self.get_agent_dir(agent_name) / "skills"
 
@@ -1262,7 +1262,7 @@ class Settings:
             agent_name: Name of the agent
 
         Returns:
-            Path to ~/.deepagents/{agent_name}/skills/
+            Path to ~/.agent-tui/{agent_name}/skills/
         """
         skills_dir = self.get_user_skills_dir(agent_name)
         skills_dir.mkdir(parents=True, exist_ok=True)
@@ -1272,17 +1272,17 @@ class Settings:
         """Get project-level skills directory path.
 
         Returns:
-            Path to {project_root}/.deepagents/skills/, or None if not in a project
+            Path to {project_root}/.agent-tui/skills/, or None if not in a project
         """
         if not self.project_root:
             return None
-        return self.project_root / ".deepagents" / "skills"
+        return self.project_root / ".agent-tui" / "skills"
 
     def ensure_project_skills_dir(self) -> Path | None:
         """Ensure project-level skills directory exists and return its path.
 
         Returns:
-            Path to {project_root}/.deepagents/skills/, or None if not in a project
+            Path to {project_root}/.agent-tui/skills/, or None if not in a project
         """
         if not self.project_root:
             return None
@@ -1299,7 +1299,7 @@ class Settings:
             agent_name: Name of the CLI agent (e.g., "deepagents")
 
         Returns:
-            Path to ~/.deepagents/{agent_name}/agents/
+            Path to ~/.agent-tui/{agent_name}/agents/
         """
         return self.get_agent_dir(agent_name) / "agents"
 
@@ -1307,11 +1307,11 @@ class Settings:
         """Get project-level agents directory path for custom subagent definitions.
 
         Returns:
-            Path to {project_root}/.deepagents/agents/, or None if not in a project
+            Path to {project_root}/.agent-tui/agents/, or None if not in a project
         """
         if not self.project_root:
             return None
-        return self.project_root / ".deepagents" / "agents"
+        return self.project_root / ".agent-tui" / "agents"
 
     @property
     def user_agents_dir(self) -> Path:
@@ -1381,8 +1381,8 @@ class Settings:
     def get_extra_skills_dirs(self) -> list[Path]:
         """Get user-configured extra skill directories.
 
-        Set via `DEEPAGENTS_CLI_EXTRA_SKILLS_DIRS` (colon-separated paths) or
-        `[skills].extra_allowed_dirs` in `~/.deepagents/config.toml`.
+        Set via `AGENT_TUI_EXTRA_SKILLS_DIRS` (colon-separated paths) or
+        `[skills].extra_allowed_dirs` in `~/.agent-tui/config.toml`.
 
         Returns:
             List of extra skill directory paths, or empty list if not configured.
@@ -1610,9 +1610,9 @@ def get_langsmith_project_name() -> str | None:
     Checks for the required API key and tracing environment variables.
     When both are present, resolves the project name with priority:
     `settings.deepagents_langchain_project` (from
-    `DEEPAGENTS_CLI_LANGSMITH_PROJECT`), then `LANGSMITH_PROJECT` from the
+    `AGENT_TUI_LANGSMITH_PROJECT`), then `LANGSMITH_PROJECT` from the
     environment (note: this may already have been overridden at bootstrap time
-    to match `DEEPAGENTS_CLI_LANGSMITH_PROJECT`), then `'deepagents-cli'`.
+    to match `AGENT_TUI_LANGSMITH_PROJECT`), then `'agent-tui'`.
 
     Returns:
         Project name string when LangSmith tracing is active, None otherwise.
@@ -1631,7 +1631,7 @@ def get_langsmith_project_name() -> str | None:
     return (
         _get_settings().deepagents_langchain_project
         or os.environ.get("LANGSMITH_PROJECT")
-        or "deepagents-cli"
+        or "agent-tui"
     )
 
 
@@ -1683,7 +1683,7 @@ def fetch_langsmith_project_url(project_name: str) -> str | None:
             from agent_tui.model_config import resolve_env_var
 
             # Explicit api_key because Client() reads os.environ directly
-            # and doesn't know about the DEEPAGENTS_CLI_ prefix.
+            # and doesn't know about the AGENT_TUI_ prefix.
             api_key = resolve_env_var("LANGSMITH_API_KEY") or resolve_env_var(
                 "LANGCHAIN_API_KEY"
             )
@@ -1874,7 +1874,7 @@ def _apply_openrouter_defaults(kwargs: dict[str, Any]) -> None:
     (see https://openrouter.ai/docs/app-attribution).
 
     Users can override either value provider-wide or per-model in
-    `~/.deepagents/config.toml`:
+    `~/.agent-tui/config.toml`:
 
     ```toml
     # Provider-wide

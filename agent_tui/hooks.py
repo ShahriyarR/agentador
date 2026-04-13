@@ -1,11 +1,11 @@
 """Lightweight hook dispatch for external tool integration.
 
-Loads hook configuration from `~/.deepagents/hooks.json` and fires matching
+Loads hook configuration from `~/.agent-tui/hooks.json` and fires matching
 commands with JSON payloads on stdin. Subprocess work is offloaded to a
 background thread so the caller's event loop is never stalled. Failures are
 logged but never bubble up to the caller.
 
-Config format (`~/.deepagents/hooks.json`):
+Config format (`~/.agent-tui/hooks.json`):
 
 ```json
 {"hooks": [{"command": ["bash", "adapter.sh"], "events": ["session.start"]}]}

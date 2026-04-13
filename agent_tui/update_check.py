@@ -326,7 +326,7 @@ async def perform_upgrade() -> tuple[bool, str]:
 def is_update_check_enabled() -> bool:
     """Return whether update checks are enabled.
 
-    Checks `DEEPAGENTS_CLI_NO_UPDATE_CHECK` env var and the `[update].check` key
+    Checks `AGENT_TUI_NO_UPDATE_CHECK` env var and the `[update].check` key
     in `config.toml`.
 
     Defaults to enabled.
@@ -341,7 +341,7 @@ def is_update_check_enabled() -> bool:
 def is_auto_update_enabled() -> bool:
     """Return whether auto-update is enabled.
 
-    Opt-in via `DEEPAGENTS_CLI_AUTO_UPDATE=1` env var or
+    Opt-in via `AGENT_TUI_AUTO_UPDATE=1` env var or
     `[update].auto_update = true` in `config.toml`.
 
     Defaults to `False`.

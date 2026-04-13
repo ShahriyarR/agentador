@@ -168,7 +168,7 @@ def show_list_help() -> None:
     console.print("  deepagents list [options]")
     console.print()
     console.print(
-        "List all agents found in ~/.deepagents/. Each agent has its own",
+        "List all agents found in ~/.agent-tui/. Each agent has its own",
     )
     console.print(
         "AGENTS.md system prompt and separate thread history.",
@@ -268,9 +268,9 @@ def show_skills_help() -> None:
     )
     console.print(
         "  1. .agents/skills/                 project skills\n"
-        "  2. .deepagents/skills/             project skills (alias)\n"
+        "  2. .agent-tui/skills/             project skills (alias)\n"
         "  3. ~/.agents/skills/               user skills\n"
-        "  4. ~/.deepagents/<agent>/skills/   user skills (alias)\n"
+        "  4. ~/.agent-tui/<agent>/skills/   user skills (alias)\n"
         "  5. <package>/built_in_skills/      built-in skills",
     )
     console.print()
