@@ -9,10 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from agent_tui.skills.load import ExtendedSkillMetadata
+from typing import Any
 
 
 class BypassTier(StrEnum):
@@ -270,7 +267,7 @@ appear as `/skill:model`).
 
 
 def build_skill_commands(
-    skills: list[ExtendedSkillMetadata],
+    skills: list[dict[str, Any]],
 ) -> list[tuple[str, str, str]]:
     """Build autocomplete tuples for discovered skills.
 
