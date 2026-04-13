@@ -455,7 +455,7 @@ def _detect_charset_mode() -> CharsetMode:
     encoding = getattr(sys.stdout, "encoding", "") or ""
     if "utf" in encoding.lower():
         return CharsetMode.UNICODE
-    lang = os.environ.get("LANG", "") or os.environ.get("LC_ALL", "")
+    lang = os.environ.get("LANG", "") or os.environ.get("AT_ALL", "")
     if "utf" in lang.lower():
         return CharsetMode.UNICODE
     return CharsetMode.ASCII

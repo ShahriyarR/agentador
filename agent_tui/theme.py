@@ -39,116 +39,116 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Brand palette — dark  (originally tokyonight-inspired, LangChain blue primary)
 # ---------------------------------------------------------------------------
-LC_DARK = "#11121D"
+AT_DARK = "#11121D"
 """Background — visible blue tint, distinguishable from pure black."""
 
-LC_CARD = "#1A1B2E"
+AT_CARD = "#1A1B2E"
 """Surface / card — clearly elevated above background."""
 
-LC_BORDER_DK = "#25283B"
+AT_BORDER_DK = "#25283B"
 """Borders on dark backgrounds."""
 
-LC_BORDER_LT = "#3A3E57"
+AT_BORDER_LT = "#3A3E57"
 """Borders on lighter / hovered backgrounds."""
 
-LC_BODY = "#C0CAF5"
+AT_BODY = "#C0CAF5"
 """Body text — high contrast on dark backgrounds."""
 
-LC_BLUE = "#7AA2F7"
+AT_BLUE = "#7AA2F7"
 """Primary accent blue."""
 
-LC_PURPLE = "#BB9AF7"
+AT_PURPLE = "#BB9AF7"
 """Secondary accent / badges / labels."""
 
-LC_GREEN = "#9ECE6A"
+AT_GREEN = "#9ECE6A"
 """Success / positive indicator."""
 
-LC_AMBER = "#EB8B46"
+AT_AMBER = "#EB8B46"
 """Warning / caution indicator."""
 
-LC_PINK = "#F7768E"
+AT_PINK = "#F7768E"
 """Error / destructive actions."""
 
-LC_MUTED = "#545C7E"
+AT_MUTED = "#545C7E"
 """Muted / secondary text."""
 
-LC_GREEN_BG = "#1C2A38"
+AT_GREEN_BG = "#1C2A38"
 """Subtle green-tinted background for diff additions."""
 
-LC_PINK_BG = "#2A1F32"
+AT_PINK_BG = "#2A1F32"
 """Subtle pink-tinted background for diff removals / errors."""
 
-LC_PANEL = "#25283B"
+AT_PANEL = "#25283B"
 """Panel — differentiated section background (above surface)."""
 
-LC_SKILL = "#A78BFA"
+AT_SKILL = "#A78BFA"
 """Skill invocation accent — border and header text."""
 
-LC_SKILL_HOVER = "#C4B5FD"
+AT_SKILL_HOVER = "#C4B5FD"
 """Skill invocation hover — lighter variant for interactive feedback."""
 
-LC_TOOL = LC_AMBER
+AT_TOOL = AT_AMBER
 """Tool call accent — border and header text."""
 
-LC_TOOL_HOVER = "#FFCB91"
+AT_TOOL_HOVER = "#FFCB91"
 """Tool call hover — lighter variant for interactive feedback."""
 
 
 # ---------------------------------------------------------------------------
 # Brand palette — light
 # ---------------------------------------------------------------------------
-LC_LIGHT_BG = "#F5F5F7"
+AT_LIGHT_BG = "#F5F5F7"
 """Background — warm neutral white."""
 
-LC_LIGHT_SURFACE = "#EAEAEE"
+AT_LIGHT_SURFACE = "#EAEAEE"
 """Surface / card — slightly darker than background."""
 
-LC_LIGHT_BORDER = "#C8CAD0"
+AT_LIGHT_BORDER = "#C8CAD0"
 """Borders on light backgrounds."""
 
-LC_LIGHT_BORDER_HVR = "#A0A4B0"
+AT_LIGHT_BORDER_HVR = "#A0A4B0"
 """Borders on hovered / focused surfaces."""
 
-LC_LIGHT_BODY = "#24283B"
+AT_LIGHT_BODY = "#24283B"
 """Body text — high contrast on light backgrounds."""
 
-LC_LIGHT_BLUE = "#2E5EAA"
+AT_LIGHT_BLUE = "#2E5EAA"
 """Primary accent blue (darkened for light bg contrast)."""
 
-LC_LIGHT_PURPLE = "#7C3AED"
+AT_LIGHT_PURPLE = "#7C3AED"
 """Secondary accent (darkened for light bg contrast)."""
 
-LC_LIGHT_GREEN = "#3A7D0A"
+AT_LIGHT_GREEN = "#3A7D0A"
 """Success / positive (darkened for light bg contrast)."""
 
-LC_LIGHT_AMBER = "#B45309"
+AT_LIGHT_AMBER = "#B45309"
 """Warning / caution (darkened for light bg contrast)."""
 
-LC_LIGHT_PINK = "#BE185D"
+AT_LIGHT_PINK = "#BE185D"
 """Error / destructive (darkened for light bg contrast)."""
 
-LC_LIGHT_MUTED = "#6B7280"
+AT_LIGHT_MUTED = "#6B7280"
 """Muted / secondary text on light backgrounds."""
 
-LC_LIGHT_GREEN_BG = "#DCFCE7"
+AT_LIGHT_GREEN_BG = "#DCFCE7"
 """Subtle green-tinted background for diff additions."""
 
-LC_LIGHT_PINK_BG = "#FEE2E2"
+AT_LIGHT_PINK_BG = "#FEE2E2"
 """Subtle pink-tinted background for diff removals / errors."""
 
-LC_LIGHT_PANEL = "#E0E1E6"
+AT_LIGHT_PANEL = "#E0E1E6"
 """Panel for light theme — differentiated section background."""
 
-LC_LIGHT_SKILL = "#7C3AED"
+AT_LIGHT_SKILL = "#7C3AED"
 """Skill invocation accent (darkened for light bg contrast)."""
 
-LC_LIGHT_SKILL_HOVER = "#6D28D9"
+AT_LIGHT_SKILL_HOVER = "#6D28D9"
 """Skill invocation hover (darkened for light bg contrast)."""
 
-LC_LIGHT_TOOL = LC_LIGHT_AMBER
+AT_LIGHT_TOOL = AT_LIGHT_AMBER
 """Tool call accent (darkened for light bg contrast)."""
 
-LC_LIGHT_TOOL_HOVER = "#78350F"
+AT_LIGHT_TOOL_HOVER = "#78350F"
 """Tool call hover (darkened for light bg contrast)."""
 
 
@@ -335,44 +335,44 @@ class ThemeColors:
 # ---------------------------------------------------------------------------
 
 DARK_COLORS = ThemeColors(
-    primary=LC_BLUE,
-    secondary=LC_PURPLE,
-    accent=LC_GREEN,
-    panel=LC_PANEL,
-    success=LC_GREEN,
-    warning=LC_AMBER,
-    error=LC_PINK,
-    muted=LC_MUTED,
-    mode_bash=LC_PINK,
-    mode_command=LC_PURPLE,
-    skill=LC_SKILL,
-    skill_hover=LC_SKILL_HOVER,
-    tool=LC_TOOL,
-    tool_hover=LC_TOOL_HOVER,
-    foreground=LC_BODY,
-    background=LC_DARK,
-    surface=LC_CARD,
+    primary=AT_BLUE,
+    secondary=AT_PURPLE,
+    accent=AT_GREEN,
+    panel=AT_PANEL,
+    success=AT_GREEN,
+    warning=AT_AMBER,
+    error=AT_PINK,
+    muted=AT_MUTED,
+    mode_bash=AT_PINK,
+    mode_command=AT_PURPLE,
+    skill=AT_SKILL,
+    skill_hover=AT_SKILL_HOVER,
+    tool=AT_TOOL,
+    tool_hover=AT_TOOL_HOVER,
+    foreground=AT_BODY,
+    background=AT_DARK,
+    surface=AT_CARD,
 )
 """Color set for the dark LangChain theme."""
 
 LIGHT_COLORS = ThemeColors(
-    primary=LC_LIGHT_BLUE,
-    secondary=LC_LIGHT_PURPLE,
-    accent=LC_LIGHT_GREEN,
-    panel=LC_LIGHT_PANEL,
-    success=LC_LIGHT_GREEN,
-    warning=LC_LIGHT_AMBER,
-    error=LC_LIGHT_PINK,
-    muted=LC_LIGHT_MUTED,
-    mode_bash=LC_LIGHT_PINK,
-    mode_command=LC_LIGHT_PURPLE,
-    skill=LC_LIGHT_SKILL,
-    skill_hover=LC_LIGHT_SKILL_HOVER,
-    tool=LC_LIGHT_TOOL,
-    tool_hover=LC_LIGHT_TOOL_HOVER,
-    foreground=LC_LIGHT_BODY,
-    background=LC_LIGHT_BG,
-    surface=LC_LIGHT_SURFACE,
+    primary=AT_LIGHT_BLUE,
+    secondary=AT_LIGHT_PURPLE,
+    accent=AT_LIGHT_GREEN,
+    panel=AT_LIGHT_PANEL,
+    success=AT_LIGHT_GREEN,
+    warning=AT_LIGHT_AMBER,
+    error=AT_LIGHT_PINK,
+    muted=AT_LIGHT_MUTED,
+    mode_bash=AT_LIGHT_PINK,
+    mode_command=AT_LIGHT_PURPLE,
+    skill=AT_LIGHT_SKILL,
+    skill_hover=AT_LIGHT_SKILL_HOVER,
+    tool=AT_LIGHT_TOOL,
+    tool_hover=AT_LIGHT_TOOL_HOVER,
+    foreground=AT_LIGHT_BODY,
+    background=AT_LIGHT_BG,
+    surface=AT_LIGHT_SURFACE,
 )
 """Color set for the light LangChain theme."""
 
@@ -426,12 +426,12 @@ def _builtin_themes() -> dict[str, ThemeEntry]:
         Dict of built-in theme names to `ThemeEntry` instances.
     """
     r: dict[str, ThemeEntry] = {}
-    r["langchain"] = ThemeEntry(
+    r["agent-dark"] = ThemeEntry(
         label="LangChain Dark",
         dark=True,
         colors=DARK_COLORS,
     )
-    r["langchain-light"] = ThemeEntry(
+    r["agent-light"] = ThemeEntry(
         label="LangChain Light",
         dark=False,
         colors=LIGHT_COLORS,
@@ -678,7 +678,7 @@ function call and cannot be mutated after freeze. The `ClassVar` declaration on
 `ThemeEntry` provides the type; this assignment supplies the value.
 """
 
-DEFAULT_THEME = "langchain"
+DEFAULT_THEME = "agent-dark"
 """Theme name used when no preference is saved."""
 
 

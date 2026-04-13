@@ -99,7 +99,7 @@ if TYPE_CHECKING:
 # when env vars are inherited but running in non-TTY context like CI)
 _IS_ITERM = (
     (
-        os.environ.get("LC_TERMINAL", "") == "iTerm2"
+        os.environ.get("AT_TERMINAL", "") == "iTerm2"
         or os.environ.get("TERM_PROGRAM", "") == "iTerm.app"
     )
     and hasattr(os, "isatty")
@@ -153,7 +153,7 @@ def _load_theme_preference() -> str:
     """Load the saved theme name from config, or return the default.
 
     Returns:
-        A Textual theme name (e.g., `'langchain'`, `'langchain-light'`).
+        A Textual theme name (e.g., `'agent-dark'`, `'agent-light'`).
     """
     import tomllib
 
