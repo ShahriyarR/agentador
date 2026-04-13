@@ -73,7 +73,10 @@ def clear_caches() -> None:
     """No-op stub: no caches to clear in standalone mode."""
 
 
-def is_warning_suppressed(key: str) -> bool:  # noqa: ARG001
+def is_warning_suppressed(  # noqa: ARG001
+    key: str,
+    config_path: "Path | None" = None,  # noqa: ARG001
+) -> bool:
     """Stub: returns False (no warnings suppressed by default)."""
     return False
 

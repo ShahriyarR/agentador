@@ -3,12 +3,113 @@
 import argparse
 import logging
 import os
+import shutil
 import sys
+from pathlib import Path
 from typing import Any
 
 from agent_tui._version import __version__
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Optional-tools check (ripgrep, tavily)
+# ---------------------------------------------------------------------------
+
+_RIPGREP_URL = "https://github.com/BurntSushi/ripgrep#installation"
+"""Fallback installation URL when no platform package manager is detected."""
+
+_SUPPRESS_HINT_TUI = "Use /notifications to manage warnings."
+"""Suppression hint for TUI toasts, referencing the in-app settings screen."""
+
+
+def _ripgrep_install_hint() -> str:
+    """Return a platform-specific install command for ripgrep."""
+    plat = sys.platform
+    if plat == "darwin":
+        if shutil.which("brew"):
+            return "brew install ripgrep"
+        if shutil.which("port"):
+            return "sudo port install ripgrep"
+    elif plat == "linux":
+        if shutil.which("apt-get"):
+            return "sudo apt-get install ripgrep"
+        if shutil.which("dnf"):
+            return "sudo dnf install ripgrep"
+        if shutil.which("pacman"):
+            return "sudo pacman -S ripgrep"
+        if shutil.which("zypper"):
+            return "sudo zypper install ripgrep"
+        if shutil.which("apk"):
+            return "sudo apk add ripgrep"
+        if shutil.which("nix-env"):
+            return "nix-env -iA nixpkgs.ripgrep"
+    elif plat == "win32":
+        if shutil.which("choco"):
+            return "choco install ripgrep"
+        if shutil.which("scoop"):
+            return "scoop install ripgrep"
+        if shutil.which("winget"):
+            return "winget install BurntSushi.ripgrep"
+    if shutil.which("cargo"):
+        return "cargo install ripgrep"
+    if shutil.which("conda"):
+        return "conda install -c conda-forge ripgrep"
+    return _RIPGREP_URL
+
+
+def check_optional_tools(*, config_path: Path | None = None) -> list[str]:
+    """Check for recommended external tools and return missing tool names.
+
+    Skips tools that the user has suppressed via ``[warnings].suppress`` in
+    ``config.toml``.
+
+    Args:
+        config_path: Path to config file.  Defaults to
+            ``~/.agent-tui/config.toml``.
+
+    Returns:
+        List of missing tool names (e.g. ``["ripgrep"]``).
+    """
+    from agent_tui.model_config import is_warning_suppressed
+
+    missing: list[str] = []
+    if shutil.which("rg") is None and not is_warning_suppressed(
+        "ripgrep", config_path
+    ):
+        missing.append("ripgrep")
+
+    from agent_tui.config import settings
+
+    if not settings.has_tavily and not is_warning_suppressed("tavily", config_path):
+        missing.append("tavily")
+
+    return missing
+
+
+def format_tool_warning_tui(tool: str) -> str:
+    """Format a missing-tool warning for the TUI toast.
+
+    Args:
+        tool: Name of the missing tool.
+
+    Returns:
+        Plain-text warning suitable for ``App.notify``.
+    """
+    if tool == "ripgrep":
+        hint = _ripgrep_install_hint()
+        return (
+            "ripgrep is not installed; the grep tool will use a slower fallback.\n"
+            f"\nInstall: {hint}\n\n"
+            f"{_SUPPRESS_HINT_TUI}"
+        )
+    if tool == "tavily":
+        return (
+            "Web search is disabled \u2014 TAVILY_API_KEY is not set.\n"
+            "\nGet a key at https://tavily.com\n\n"
+            f"{_SUPPRESS_HINT_TUI}"
+        )
+    return f"{tool} is not installed."
 
 
 def parse_args() -> argparse.Namespace:
