@@ -249,6 +249,8 @@ class ModelSelectorScreen(ModalScreen[tuple[str, str] | None]):
         current_model: str | None = None,
         current_provider: str | None = None,
         cli_profile_override: dict[str, Any] | None = None,
+        *,
+        models: list[dict[str, Any]] | None = None,
     ) -> None:
         """Initialize the ModelSelectorScreen.
 
@@ -262,11 +264,15 @@ class ModelSelectorScreen(ModalScreen[tuple[str, str] | None]):
 
                 Merged on top of upstream + config.toml profiles so that CLI
                 overrides appear with `*` markers in the detail footer.
+            models: Optional list of model dicts from AgentProtocol.get_models().
+                Each dict should have ``name`` and ``provider`` keys.  When
+                provided, this list is used instead of the stub discovery path.
         """
         super().__init__()
         self._current_model = current_model
         self._current_provider = current_provider
         self._cli_profile_override = cli_profile_override
+        self._protocol_models = models
 
         # Model data — populated asynchronously in on_mount via _load_model_data
         self._all_models: list[tuple[str, str]] = []
@@ -386,29 +392,42 @@ class ModelSelectorScreen(ModalScreen[tuple[str, str] | None]):
         filter_input = self.query_one("#model-filter", Input)
         filter_input.focus()
 
-        # Offload to thread because get_available_models does filesystem I/O
-        try:
-            all_models, default_spec, profiles = await asyncio.to_thread(
-                self._load_model_data, self._cli_profile_override
-            )
-        except Exception:
-            logger.exception("Failed to load model data for /model selector")
-            self._loaded = True
-            if self.is_running:
-                self.notify(
-                    "Could not load model list. "
-                    "Check provider packages and config.toml.",
-                    severity="error",
-                    timeout=10,
-                    markup=False,
+        if self._protocol_models is not None:
+            # Use protocol-supplied model list directly (no filesystem I/O needed)
+            all_models: list[tuple[str, str]] = [
+                (
+                    f"{m.get('provider', 'stub')}:{m['name']}",
+                    m.get("provider", "stub"),
                 )
-                await self._update_display()
-                self._update_footer()
-            return
+                for m in self._protocol_models
+                if "name" in m
+            ]
+            default_spec: str | None = None
+            profiles: Mapping[str, ModelProfileEntry] = {}
+        else:
+            # Offload to thread because get_available_models does filesystem I/O
+            try:
+                all_models, default_spec, profiles = await asyncio.to_thread(
+                    self._load_model_data, self._cli_profile_override
+                )
+            except Exception:
+                logger.exception("Failed to load model data for /model selector")
+                self._loaded = True
+                if self.is_running:
+                    self.notify(
+                        "Could not load model list. "
+                        "Check provider packages and config.toml.",
+                        severity="error",
+                        timeout=10,
+                        markup=False,
+                    )
+                    await self._update_display()
+                    self._update_footer()
+                return
 
-        # Screen may have been dismissed while the thread was running
-        if not self.is_running:
-            return
+            # Screen may have been dismissed while the thread was running
+            if not self.is_running:
+                return
 
         self._all_models = all_models
         self._default_spec = default_spec

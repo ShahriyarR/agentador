@@ -619,6 +619,12 @@ class DeepAgentsApp(App):
         copy for the status bar.
         """
 
+        self._last_token_count: int = 0
+        """Last token count received from a TOKEN_UPDATE event (via adapter)."""
+
+        self._last_context_limit: int = 0
+        """Last context limit received from a TOKEN_UPDATE event (via adapter)."""
+
         self._tokens_approximate: bool = False
         """Whether the cached token count is stale (interrupted generation)."""
 
@@ -659,6 +665,12 @@ class DeepAgentsApp(App):
 
         self._message_store = MessageStore()
         """Message virtualization store."""
+
+        self._current_assistant_widget: AssistantMessage | None = None
+        """In-flight AssistantMessage widget being streamed via AgentAdapter."""
+
+        self._current_assistant_msg_id: str | None = None
+        """MessageStore ID of the in-flight assistant message."""
 
         self._startup_task: asyncio.Task[None] | None = None
         """Startup task reference (set in on_mount)."""
@@ -960,11 +972,36 @@ class DeepAgentsApp(App):
         re-walking every skill directory.
 
         Runs filesystem I/O in a thread to avoid blocking the event loop.
+        Also merges skills reported by the agent protocol via ``get_skills()``.
         """
         from agent_tui.command_registry import SLASH_COMMANDS, build_skill_commands
 
+        # Also fetch skills from agent protocol (non-blocking, best-effort)
+        protocol_skills: list[dict[str, Any]] = []
+        if self._agent is not None:
+            try:
+                protocol_skills = await self._agent.get_skills()
+            except Exception:
+                logger.debug("get_skills() failed; skipping protocol skill merge")
+
         try:
             skills, roots = await asyncio.to_thread(self._discover_skills_and_roots)
+
+            # Merge protocol skills that aren't already in the filesystem list
+            existing_names = {s["name"] for s in skills}
+            for ps in protocol_skills:
+                ps_name = ps.get("name", "")
+                if ps_name and ps_name not in existing_names:
+                    skills = list(skills) + [
+                        {
+                            "name": ps_name,
+                            "description": ps.get("description", ""),
+                            "path": None,
+                            "source": "protocol",
+                        }
+                    ]
+                    existing_names.add(ps_name)
+
             self._discovered_skills = skills
             self._skill_allowed_roots = roots
             if skills:
@@ -2534,14 +2571,20 @@ class DeepAgentsApp(App):
             await self._handle_auto_update_toggle()
         elif cmd == "/tokens":
             await self._mount_message(UserMessage(command))
-            if self._context_tokens > 0:
-                count = self._context_tokens
+            # Use the last known token count from TOKEN_UPDATE events,
+            # falling back to the local _context_tokens cache.
+            effective_count = self._last_token_count or self._context_tokens
+            if effective_count > 0:
+                count = effective_count
                 formatted = format_token_count(count)
 
                 model_name = settings.model_name
-                context_limit = settings.model_context_limit
+                # Prefer protocol-reported context limit; fall back to config
+                context_limit = (
+                    self._last_context_limit or settings.model_context_limit
+                )
 
-                if context_limit is not None:
+                if context_limit is not None and context_limit > 0:
                     limit_str = format_token_count(context_limit)
                     pct = count / context_limit * 100
                     usage = f"{formatted} / {limit_str} tokens ({pct:.0f}%)"
@@ -2567,10 +2610,12 @@ class DeepAgentsApp(App):
                 await self._mount_message(AppMessage(msg))
             else:
                 model_name = settings.model_name
-                context_limit = settings.model_context_limit
+                context_limit = (
+                    self._last_context_limit or settings.model_context_limit
+                )
 
                 parts: list[str] = ["No token usage yet"]
-                if context_limit is not None:
+                if context_limit is not None and context_limit > 0:
                     limit_str = format_token_count(context_limit)
                     parts.append(f"{limit_str} token context window")
                 if model_name:
@@ -2834,6 +2879,15 @@ class DeepAgentsApp(App):
             return
 
         envelope = build_skill_invocation_envelope(cached, content, args)
+
+        # Notify agent protocol of the skill invocation
+        if self._agent is not None:
+            try:
+                await self._agent.invoke_skill(normalized_name, args)
+            except Exception:
+                logger.debug(
+                    "invoke_skill() notification failed for %r", normalized_name
+                )
 
         await self._mount_message(
             SkillMessage(
@@ -3847,10 +3901,21 @@ class DeepAgentsApp(App):
         from agent_tui.config import settings
         from agent_tui.widgets.model_selector import ModelSelectorScreen
 
+        # Fetch available models from the agent protocol
+        protocol_models: list[dict[str, Any]] | None = None
+        if self._agent is not None:
+            try:
+                protocol_models = await self._agent.get_models()
+            except Exception:
+                logger.debug("get_models() failed; falling back to local discovery")
+
         def handle_result(result: tuple[str, str] | None) -> None:
             """Handle the model selector result."""
             if result is not None:
                 model_spec, _ = result
+                # Notify agent protocol of the model change
+                if self._agent is not None:
+                    self.call_later(self._agent.set_model, model_spec)
                 if self._agent_running or self._shell_running or self._connecting:
                     self._defer_action(
                         DeferredAction(
@@ -3881,6 +3946,7 @@ class DeepAgentsApp(App):
             current_model=settings.model_name,
             current_provider=settings.model_provider,
             cli_profile_override=self._profile_override,
+            models=protocol_models,
         )
         self.push_screen(screen, handle_result)
 
@@ -4002,9 +4068,27 @@ class DeepAgentsApp(App):
 
     async def _show_mcp_viewer(self) -> None:
         """Show read-only MCP server/tool viewer as a modal screen."""
+        from agent_tui.mcp_tools import MCPServerInfo, MCPTool
         from agent_tui.widgets.mcp_viewer import MCPViewerScreen
 
-        screen = MCPViewerScreen(server_info=self._mcp_server_info or [])
+        server_info = self._mcp_server_info or []
+
+        # When no real MCP servers are configured, show stub data so the
+        # /mcp viewer is not entirely empty during development/demo mode.
+        if not server_info:
+            server_info = [
+                MCPServerInfo(
+                    name="stub-server",
+                    transport="stdio",
+                    tools=[
+                        MCPTool(name="bash", description="Execute shell commands"),
+                        MCPTool(name="read_file", description="Read file contents"),
+                        MCPTool(name="write_file", description="Write to a file"),
+                    ],
+                )
+            ]
+
+        screen = MCPViewerScreen(server_info=server_info)
 
         def handle_result(result: None) -> None:  # noqa: ARG001
             if self._chat_input:
@@ -4017,12 +4101,35 @@ class DeepAgentsApp(App):
         from functools import partial
 
         from agent_tui.sessions import get_cached_threads, get_thread_limit
+        from agent_tui.sessions import ThreadInfo
         from agent_tui.widgets.thread_selector import ThreadSelectorScreen
 
         current = self._session_state.thread_id if self._session_state else None
         thread_limit = get_thread_limit()
 
-        initial_threads = get_cached_threads(limit=thread_limit)
+        # Prefer protocol threads; fall back to local session cache
+        initial_threads: list[ThreadInfo] | None = None
+        if self._agent is not None:
+            try:
+                raw_threads = await self._agent.get_threads()
+                def _to_thread_info(t: dict[str, Any]) -> ThreadInfo:
+                    ti = ThreadInfo(
+                        thread_id=t.get("id") or t.get("thread_id") or "",
+                        agent_name=t.get("agent_name") or t.get("title"),
+                        updated_at=t.get("updated_at"),
+                        created_at=t.get("created_at"),
+                    )
+                    mc = t.get("message_count")
+                    if mc is not None:
+                        ti["message_count"] = int(mc)
+                    return ti
+
+                initial_threads = [_to_thread_info(t) for t in raw_threads]
+            except Exception:
+                logger.debug("get_threads() failed; falling back to session cache")
+
+        if initial_threads is None:
+            initial_threads = get_cached_threads(limit=thread_limit)
 
         def handle_result(result: str | None) -> None:
             """Handle the thread selector result."""
@@ -4377,50 +4484,114 @@ class DeepAgentsApp(App):
     def append_assistant_text(self, text: str) -> None:
         """Append streaming text to the current assistant message.
 
-        Called by AgentAdapter on MESSAGE_CHUNK events. Full wiring happens
-        in Task 21; this stub satisfies the interface contract for now.
+        Called by AgentAdapter on MESSAGE_CHUNK events. Creates a new
+        AssistantMessage widget on the first chunk, then streams subsequent
+        chunks into it via MarkdownStream.
         """
-        pass  # TODO(Task 21): wire to AssistantMessage streaming logic
+        if self._current_assistant_widget is None:
+            # First chunk — create widget and schedule mount.
+            widget = AssistantMessage()
+            self._current_assistant_widget = widget
+            # Mount the widget and then write the first chunk once it is live.
+            async def _mount_and_write(chunk: str = text) -> None:
+                await self._mount_message(widget)
+                # Store the message ID so finalize can sync content.
+                if widget.id:
+                    self._current_assistant_msg_id = widget.id
+                    self._set_active_message(widget.id)
+                await widget.append_content(chunk)
+
+            self.call_later(_mount_and_write)
+        else:
+            # Subsequent chunk — append to existing stream.
+            widget = self._current_assistant_widget
+            self.call_later(widget.append_content, text)
 
     def finalize_assistant_message(self) -> None:
         """Mark the current assistant message as complete.
 
-        Called by AgentAdapter on MESSAGE_END events.
+        Called by AgentAdapter on MESSAGE_END events. Stops the MarkdownStream,
+        syncs final content back to the MessageStore, and clears tracking state.
         """
-        pass  # TODO(Task 21): finalise in-flight AssistantMessage
+        widget = self._current_assistant_widget
+        msg_id = self._current_assistant_msg_id
+
+        async def _finalize() -> None:
+            if widget is not None:
+                await widget.stop_stream()
+                if msg_id is not None:
+                    self._sync_message_content(msg_id, widget._content)
+                    self._set_active_message(None)
+
+        self.call_later(_finalize)
+        self._current_assistant_widget = None
+        self._current_assistant_msg_id = None
 
     async def request_tool_approval(
         self, tool_name: str, tool_args: dict, tool_id: str
     ) -> bool:
         """Push approval modal, return True/False.
 
-        Called by AgentAdapter on TOOL_CALL events.
-        Full wiring (delegating to _request_approval) happens in Task 21.
+        Called by AgentAdapter on TOOL_CALL events. Delegates to
+        _request_approval, translating its result dict to a bool.
         """
-        return True  # TODO(Task 21): wire to _request_approval
+        action_request: dict[str, Any] = {"name": tool_name, "args": tool_args}
+        result_future = await self._request_approval([action_request], None)
+        try:
+            result = await result_future
+        except Exception:
+            logger.exception("Error waiting for tool approval")
+            return False
+        return result.get("type") == "approve"
 
     def show_tool_result(
         self, tool_name: str, tool_output: str, tool_id: str
     ) -> None:
         """Mount tool result widget.
 
-        Called by AgentAdapter on TOOL_RESULT events.
+        Called by AgentAdapter on TOOL_RESULT events. Mounts a ToolCallMessage
+        pre-populated with the success output.
         """
-        pass  # TODO(Task 21): mount ToolCallMessage with result
+        widget = ToolCallMessage(tool_name=tool_name, id=f"tool-{tool_id}")
+        # Apply deferred state so the widget renders correctly on mount.
+        widget._deferred_status = "success"
+        widget._deferred_output = tool_output
+
+        self.call_later(self._mount_message, widget)
 
     async def ask_user(self, question: str) -> str:
         """Push ask-user modal, return answer.
 
-        Called by AgentAdapter on ASK_USER events.
-        Full wiring (delegating to _request_ask_user) happens in Task 21.
+        Called by AgentAdapter on ASK_USER events. Wraps the question string
+        into the Question TypedDict format expected by _request_ask_user, then
+        waits for the user response.
         """
-        return ""  # TODO(Task 21): wire to _request_ask_user
+        from agent_tui._ask_user_types import Question
+
+        questions: list[Question] = [{"question": question, "type": "text"}]
+        result_future = await self._request_ask_user(questions)
+        try:
+            result = await result_future
+        except Exception:
+            logger.exception("Error waiting for ask_user response")
+            return ""
+
+        if result.get("type") == "answered":
+            answers = result.get("answers", [])
+            return answers[0] if answers else ""
+        # Cancelled
+        return ""
 
     def update_token_display(self, token_count: int, context_limit: int) -> None:
         """Update status bar token counts.
 
-        Called by AgentAdapter on TOKEN_UPDATE events.
+        Called by AgentAdapter on TOKEN_UPDATE events. Caches the context limit
+        and delegates to _on_tokens_update for the status bar refresh.
         """
+        # Cache for use by /tokens command and other consumers.
+        self._last_token_count = token_count
+        self._last_context_limit = context_limit
+        # _on_tokens_update handles count display and caching.
         self._on_tokens_update(token_count)
 
     def set_status(self, status: str) -> None:
