@@ -74,9 +74,7 @@ def check_optional_tools(*, config_path: Path | None = None) -> list[str]:
     from agent_tui.configurator.model_config import is_warning_suppressed
 
     missing: list[str] = []
-    if shutil.which("rg") is None and not is_warning_suppressed(
-        "ripgrep", config_path
-    ):
+    if shutil.which("rg") is None and not is_warning_suppressed("ripgrep", config_path):
         missing.append("ripgrep")
 
     from agent_tui.configurator.settings import settings
@@ -130,6 +128,13 @@ def parse_args() -> argparse.Namespace:
         version=f"agent-tui {__version__}",
     )
 
+    parser.add_argument(
+        "--agent",
+        choices=["stub", "deepagents"],
+        default="stub",
+        help="Agent backend to use",
+    )
+
     return parser.parse_args()
 
 
@@ -157,9 +162,16 @@ def cli_main() -> None:
         from agent_tui.configurator.settings import settings  # noqa: F401
 
         from agent_tui.entrypoints.app import AgentTuiApp
-        from agent_tui.services.stub_agent import StubAgent
 
-        agent = StubAgent()
+        if _args.agent == "deepagents":
+            from agent_tui.services.deep_agents import DeepAgentsAdapter
+
+            agent = DeepAgentsAdapter.from_settings()
+        else:
+            from agent_tui.services.stub_agent import StubAgent
+
+            agent = StubAgent()
+
         app = AgentTuiApp(agent=agent)
         app.run()
 

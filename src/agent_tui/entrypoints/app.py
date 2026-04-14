@@ -95,10 +95,7 @@ if TYPE_CHECKING:
 # Detection: check env vars AND that stderr is a TTY (avoids false positives
 # when env vars are inherited but running in non-TTY context like CI)
 _IS_ITERM = (
-    (
-        os.environ.get("AT_TERMINAL", "") == "iTerm2"
-        or os.environ.get("TERM_PROGRAM", "") == "iTerm.app"
-    )
+    (os.environ.get("AT_TERMINAL", "") == "iTerm2" or os.environ.get("TERM_PROGRAM", "") == "iTerm.app")
     and hasattr(os, "isatty")
     and os.isatty(2)
 )
@@ -308,10 +305,7 @@ def _extract_model_params_flag(raw_arg: str) -> tuple[str, dict[str, Any] | None
     try:
         params = json.loads(json_str)
     except json.JSONDecodeError:
-        msg = (
-            f"Invalid JSON in --model-params: {json_str!r}. "
-            'Expected format: --model-params \'{"key": "value"}\''
-        )
+        msg = f'Invalid JSON in --model-params: {json_str!r}. Expected format: --model-params \'{{"key": "value"}}\''
         raise ValueError(msg) from None
     if not isinstance(params, dict):
         msg = "--model-params must be a JSON object, got " + type(params).__name__
@@ -532,11 +526,7 @@ class AgentTuiApp(App):
 
         self._initial_prompt = initial_prompt
 
-        self._initial_skill = (
-            initial_skill.strip().lower()
-            if initial_skill and initial_skill.strip()
-            else None
-        )
+        self._initial_skill = initial_skill.strip().lower() if initial_skill and initial_skill.strip() else None
 
         self._mcp_server_info = mcp_server_info
 
@@ -773,9 +763,7 @@ class AgentTuiApp(App):
         # (during on_mount) so by the time the first frame finishes painting
         # the subprocess is already done. _post_paint_init fires the heavier
         # workers (server, model creation) afterward.
-        self._startup_task = asyncio.create_task(
-            self._resolve_git_branch_and_continue()
-        )
+        self._startup_task = asyncio.create_task(self._resolve_git_branch_and_continue())
 
     async def _resolve_git_branch_and_continue(self) -> None:
         """Resolve git branch, then schedule remaining init workers.
@@ -883,15 +871,8 @@ class AgentTuiApp(App):
         # NOTE: _schedule_initial_submission() has a side effect (queues a
         # task via call_after_refresh); short-circuit ensures it only runs
         # when not connecting — the deferred path handles the connecting case.
-        if (
-            not self._connecting
-            and not self._schedule_initial_submission()
-            and self._at_thread_id
-            and self._agent
-        ):
-            self.call_after_refresh(
-                lambda: asyncio.create_task(self._load_thread_history())
-            )
+        if not self._connecting and not self._schedule_initial_submission() and self._at_thread_id and self._agent:
+            self.call_after_refresh(lambda: asyncio.create_task(self._load_thread_history()))
 
     async def _init_session_state(self) -> None:
         """Create session state in a thread (imports agent_tui.services.sessions)."""
@@ -990,8 +971,7 @@ class AgentTuiApp(App):
                     self._chat_input.update_slash_commands(merged)
                 else:
                     logger.debug(
-                        "Skill discovery completed (%d skills) but chat input "
-                        "not yet mounted; autocomplete deferred",
+                        "Skill discovery completed (%d skills) but chat input not yet mounted; autocomplete deferred",
                         len(skills),
                     )
         except OSError:
@@ -1004,8 +984,7 @@ class AgentTuiApp(App):
                 exc_info=True,
             )
             self.notify(
-                "Could not scan skill directories. "
-                "Some /skill: commands may be unavailable.",
+                "Could not scan skill directories. Some /skill: commands may be unavailable.",
                 severity="warning",
                 timeout=6,
                 markup=False,
@@ -1015,8 +994,7 @@ class AgentTuiApp(App):
             self._skill_allowed_roots = []
             logger.exception("Unexpected error during skill discovery")
             self.notify(
-                "Skill discovery failed unexpectedly. "
-                "/skill: commands may not work. Check logs for details.",
+                "Skill discovery failed unexpectedly. /skill: commands may not work. Check logs for details.",
                 severity="warning",
                 timeout=8,
                 markup=False,
@@ -1069,9 +1047,7 @@ class AgentTuiApp(App):
 
         try:
             if resume == "__MOST_RECENT__":
-                agent_filter = (
-                    self._assistant_id if self._assistant_id != default_agent else None
-                )
+                agent_filter = self._assistant_id if self._assistant_id != default_agent else None
                 thread_id = await get_most_recent(agent_filter)
                 if thread_id:
                     agent_name = await get_thread_agent(thread_id)
@@ -1185,9 +1161,7 @@ class AgentTuiApp(App):
             )
 
             await asyncio.to_thread(get_available_models)
-            await asyncio.to_thread(
-                get_model_profiles, cli_override=self._profile_override
-            )
+            await asyncio.to_thread(get_model_profiles, cli_override=self._profile_override)
         except Exception:
             logger.warning("Could not prewarm model caches", exc_info=True)
 
@@ -1275,9 +1249,7 @@ class AgentTuiApp(App):
             else:
                 heading = f"Updated to v{cli_version}"
 
-            await self._mount_message(
-                AppMessage(f"{heading}\nSee what's new: {CHANGELOG_URL}")
-            )
+            await self._mount_message(AppMessage(f"{heading}\nSee what's new: {CHANGELOG_URL}"))
         except Exception:
             logger.debug("What's new banner display failed", exc_info=True)
             return
@@ -1301,9 +1273,7 @@ class AgentTuiApp(App):
             )
 
             await self._mount_message(AppMessage("Checking for updates..."))
-            available, latest = await asyncio.to_thread(
-                is_update_available, bypass_cache=True
-            )
+            available, latest = await asyncio.to_thread(is_update_available, bypass_cache=True)
             if not available:
                 await self._mount_message(AppMessage("Already on the latest version."))
                 return
@@ -1311,28 +1281,19 @@ class AgentTuiApp(App):
             from agent_tui.configurator.version import __version__ as cli_version
 
             await self._mount_message(
-                AppMessage(
-                    f"Update available: v{latest} (current: v{cli_version}). "
-                    "Upgrading..."
-                )
+                AppMessage(f"Update available: v{latest} (current: v{cli_version}). Upgrading...")
             )
             success, output = await perform_upgrade()
             if success:
                 self._update_available = (False, None)
-                await self._mount_message(
-                    AppMessage(f"Updated to v{latest}. Restart to use the new version.")
-                )
+                await self._mount_message(AppMessage(f"Updated to v{latest}. Restart to use the new version."))
             else:
                 cmd = upgrade_command()
                 detail = f": {output[:200]}" if output else ""
-                await self._mount_message(
-                    AppMessage(f"Auto-update failed{detail}\nRun manually: {cmd}")
-                )
+                await self._mount_message(AppMessage(f"Auto-update failed{detail}\nRun manually: {cmd}"))
         except Exception as exc:
             logger.warning("/update command failed", exc_info=True)
-            await self._mount_message(
-                ErrorMessage(f"Update failed: {type(exc).__name__}: {exc}")
-            )
+            await self._mount_message(ErrorMessage(f"Update failed: {type(exc).__name__}: {exc}"))
 
     async def _handle_auto_update_toggle(self) -> None:
         """Handle the `/auto-update` slash command — persist toggle immediately."""
@@ -1471,9 +1432,7 @@ class AgentTuiApp(App):
             return
 
         old_scroll_y = chat.scroll_y
-        first_child = (
-            messages_container.children[0] if messages_container.children else None
-        )
+        first_child = messages_container.children[0] if messages_container.children else None
 
         # Build widgets in chronological order, then mount in reverse so
         # each is inserted before the previous first_child, resulting in
@@ -1568,9 +1527,7 @@ class AgentTuiApp(App):
             first_queued = self._queued_widgets[0]
             if first_queued not in children:
                 return False
-            return children.index(self._loading_widget) == (
-                children.index(first_queued) - 1
-            )
+            return children.index(self._loading_widget) == (children.index(first_queued) - 1)
 
         return children[-1] == self._loading_widget
 
@@ -1659,9 +1616,7 @@ class AgentTuiApp(App):
                 try:
                     messages = self.query_one("#messages", Container)
                     for command in approved_commands:
-                        auto_msg = AppMessage(
-                            f"✓ Auto-approved shell command (allow-list): {command}"
-                        )
+                        auto_msg = AppMessage(f"✓ Auto-approved shell command (allow-list): {command}")
                         await self._mount_before_queued(messages, auto_msg)
                     with suppress(NoMatches, ScreenStackError):
                         self.query_one("#chat", VerticalScroll).anchor()
@@ -1762,9 +1717,7 @@ class AgentTuiApp(App):
         deadline = _monotonic() + _DEFERRED_APPROVAL_TIMEOUT_SECONDS
         while self._is_user_typing():  # Simple polling
             if _monotonic() > deadline:
-                logger.warning(
-                    "Timed out waiting for user to stop typing; showing approval now"
-                )
+                logger.warning("Timed out waiting for user to stop typing; showing approval now")
                 break
             await asyncio.sleep(0.2)
 
@@ -1847,10 +1800,7 @@ class AgentTuiApp(App):
             deadline = _monotonic() + 30
             while self._pending_ask_user_widget is not None:
                 if _monotonic() > deadline:
-                    logger.error(
-                        "Timed out waiting for previous ask-user widget to "
-                        "clear. Forcefully cleaning up."
-                    )
+                    logger.error("Timed out waiting for previous ask-user widget to clear. Forcefully cleaning up.")
                     old_widget = self._pending_ask_user_widget
                     if old_widget is not None:
                         old_widget.action_cancel()
@@ -1931,9 +1881,7 @@ class AgentTuiApp(App):
 
     def _has_initial_submission(self) -> bool:
         """Return whether startup should auto-submit a prompt or skill."""
-        return self._initial_skill is not None or bool(
-            self._initial_prompt and self._initial_prompt.strip()
-        )
+        return self._initial_skill is not None or bool(self._initial_prompt and self._initial_prompt.strip())
 
     def _schedule_initial_submission(self) -> bool:
         """Schedule the startup prompt or skill after the next refresh.
@@ -1943,18 +1891,14 @@ class AgentTuiApp(App):
         """
         if not self._has_initial_submission():
             return False
-        self.call_after_refresh(
-            lambda: asyncio.create_task(self._submit_initial_submission())
-        )
+        self.call_after_refresh(lambda: asyncio.create_task(self._submit_initial_submission()))
         return True
 
     async def _submit_initial_submission(self) -> None:
         """Submit the startup prompt or skill after the UI is ready."""
         try:
             if self._initial_skill is not None:
-                await self._invoke_skill(
-                    self._initial_skill, self._initial_prompt or ""
-                )
+                await self._invoke_skill(self._initial_skill, self._initial_prompt or "")
                 return
             if self._initial_prompt and self._initial_prompt.strip():
                 await self._handle_user_message(self._initial_prompt)
@@ -1962,10 +1906,7 @@ class AgentTuiApp(App):
             logger.exception("Unhandled error during initial submission")
             with suppress(Exception):
                 await self._mount_message(
-                    ErrorMessage(
-                        "Failed to submit startup prompt. "
-                        "Try running the command manually in the session."
-                    )
+                    ErrorMessage("Failed to submit startup prompt. Try running the command manually in the session.")
                 )
 
     def _can_bypass_queue(self, value: str) -> bool:
@@ -2129,9 +2070,7 @@ class AgentTuiApp(App):
             self._shell_process = proc
 
             try:
-                stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                    proc.communicate(), timeout=60
-                )
+                stdout_bytes, stderr_bytes = await asyncio.wait_for(proc.communicate(), timeout=60)
             except TimeoutError:
                 await self._kill_shell_process()
                 await self._mount_message(ErrorMessage("Command timed out (60s limit)"))
@@ -2184,10 +2123,7 @@ class AgentTuiApp(App):
             logger.exception("Failed to drain deferred actions during shell cleanup")
             with suppress(Exception):
                 await self._mount_message(
-                    ErrorMessage(
-                        "A deferred action failed after task completion. "
-                        "You may need to retry the operation."
-                    )
+                    ErrorMessage("A deferred action failed after task completion. You may need to retry the operation.")
                 )
         await self._process_next_from_queue()
 
@@ -2211,9 +2147,7 @@ class AgentTuiApp(App):
         except ProcessLookupError:
             return
         except OSError:
-            logger.warning(
-                "Failed to terminate shell process (pid=%s)", proc.pid, exc_info=True
-            )
+            logger.warning("Failed to terminate shell process (pid=%s)", proc.pid, exc_info=True)
             return
 
         try:
@@ -2263,9 +2197,7 @@ class AgentTuiApp(App):
                 await self._mount_message(AppMessage(link))
 
             # Append directly — no dedup; each URL command gets its own output.
-            self._deferred_actions.append(
-                DeferredAction(kind="chat_output", execute=_mount_output)
-            )
+            self._deferred_actions.append(DeferredAction(kind="chat_output", execute=_mount_output))
             return
 
         await self._mount_message(UserMessage(command))
@@ -2328,16 +2260,13 @@ class AgentTuiApp(App):
         except Exception:
             logger.exception("Failed to build LangSmith thread URL for %s", thread_id)
             await self._mount_message(UserMessage(command))
-            await self._mount_message(
-                AppMessage("Failed to resolve LangSmith thread URL.")
-            )
+            await self._mount_message(AppMessage("Failed to resolve LangSmith thread URL."))
             return
         if not url:
             await self._mount_message(UserMessage(command))
             await self._mount_message(
                 AppMessage(
-                    "LangSmith tracing is not configured. "
-                    "Set LANGSMITH_API_KEY and LANGSMITH_TRACING=true to enable."
+                    "LangSmith tracing is not configured. Set LANGSMITH_API_KEY and LANGSMITH_TRACING=true to enable."
                 )
             )
             return
@@ -2368,9 +2297,7 @@ class AgentTuiApp(App):
                 await self._mount_message(AppMessage(link))
 
             # Append directly — no dedup; each /trace invocation gets its own output.
-            self._deferred_actions.append(
-                DeferredAction(kind="chat_output", execute=_mount_output)
-            )
+            self._deferred_actions.append(DeferredAction(kind="chat_output", execute=_mount_output))
             return
 
         await self._mount_message(UserMessage(command))
@@ -2462,9 +2389,7 @@ class AgentTuiApp(App):
                     banner.update_thread_id(new_thread_id)
                 except NoMatches:
                     pass
-                await self._mount_message(
-                    AppMessage(f"Started new thread: {new_thread_id}")
-                )
+                await self._mount_message(AppMessage(f"Started new thread: {new_thread_id}"))
         elif cmd == "/editor":
             await self.action_open_editor()
         elif cmd in {"/offload", "/compact"}:
@@ -2489,9 +2414,7 @@ class AgentTuiApp(App):
 
                 model_name = settings.model_name
                 # Prefer protocol-reported context limit; fall back to config
-                context_limit = (
-                    self._last_context_limit or settings.model_context_limit
-                )
+                context_limit = self._last_context_limit or settings.model_context_limit
 
                 if context_limit is not None and context_limit > 0:
                     limit_str = format_token_count(context_limit)
@@ -2519,9 +2442,7 @@ class AgentTuiApp(App):
                 await self._mount_message(AppMessage(msg))
             else:
                 model_name = settings.model_name
-                context_limit = (
-                    self._last_context_limit or settings.model_context_limit
-                )
+                context_limit = self._last_context_limit or settings.model_context_limit
 
                 parts: list[str] = ["No token usage yet"]
                 if context_limit is not None and context_limit > 0:
@@ -2541,9 +2462,7 @@ class AgentTuiApp(App):
             # Convenience alias for /skill:skill-creator — shorter and
             # discoverable before skill loading completes.
             args = command.strip()[len("/skill-creator") :].strip()
-            rewritten = (
-                f"/skill:skill-creator {args}" if args else "/skill:skill-creator"
-            )
+            rewritten = f"/skill:skill-creator {args}" if args else "/skill:skill-creator"
             await self._handle_skill_command(rewritten)
         elif cmd == "/mcp":
             await self._show_mcp_viewer()
@@ -2585,10 +2504,7 @@ class AgentTuiApp(App):
                     await self._set_default_model(model_arg)
                 else:
                     await self._mount_message(
-                        AppMessage(
-                            "Usage: /model --default provider:model\n"
-                            "       /model --default --clear"
-                        )
+                        AppMessage("Usage: /model --default provider:model\n       /model --default --clear")
                     )
             elif model_arg:
                 # Direct switch: /model claude-sonnet-4-5
@@ -2625,18 +2541,14 @@ class AgentTuiApp(App):
                 logger.warning("Failed to reload user themes", exc_info=True)
 
             if changes:
-                report = "Configuration reloaded. Changes:\n" + "\n".join(
-                    f"  - {change}" for change in changes
-                )
+                report = "Configuration reloaded. Changes:\n" + "\n".join(f"  - {change}" for change in changes)
             else:
                 report = "Configuration reloaded. No changes detected."
             report += "\nModel config caches cleared."
             if theme_reload_ok:
                 report += "\nTheme registry reloaded."
             else:
-                report += (
-                    "\nTheme registry reload failed. Check config.toml for errors."
-                )
+                report += "\nTheme registry reload failed. Check config.toml for errors."
             await self._mount_message(AppMessage(report))
 
             # Re-discover skills so autocomplete reflects any new/removed skills
@@ -2650,10 +2562,7 @@ class AgentTuiApp(App):
         # -- Hidden debug commands (not in COMMANDS / autocomplete) -----------
         elif cmd == "/debug-error":
             await self._mount_message(
-                ErrorMessage(
-                    "Server failed to start: RuntimeError: Server process"
-                    " exited with code 3"
-                )
+                ErrorMessage("Server failed to start: RuntimeError: Server process exited with code 3")
             )
         else:
             await self._mount_message(UserMessage(command))
@@ -2710,28 +2619,19 @@ class AgentTuiApp(App):
         # Cache miss — fall back to fresh discovery (offloaded to thread)
         if cached is None:
             try:
-                skills, allowed_roots = await asyncio.to_thread(
-                    self._discover_skills_and_roots
-                )
+                skills, allowed_roots = await asyncio.to_thread(self._discover_skills_and_roots)
                 # Backfill cache so subsequent invocations are fast
                 self._discovered_skills = skills
                 self._skill_allowed_roots = allowed_roots
                 cached = next((s for s in skills if s["name"] == normalized_name), None)
             except OSError as exc:
-                logger.warning(
-                    "Filesystem error loading skill %r", normalized_name, exc_info=True
-                )
-                await _mount_error(
-                    f"Could not load skill: {normalized_name}. Filesystem error: {exc}"
-                )
+                logger.warning("Filesystem error loading skill %r", normalized_name, exc_info=True)
+                await _mount_error(f"Could not load skill: {normalized_name}. Filesystem error: {exc}")
                 return
             except Exception as exc:
-                logger.warning(
-                    "Error searching for skill %r", normalized_name, exc_info=True
-                )
+                logger.warning("Error searching for skill %r", normalized_name, exc_info=True)
                 await _mount_error(
-                    f"Error loading skill: {normalized_name}. "
-                    f"Unexpected error: {type(exc).__name__}: {exc}"
+                    f"Error loading skill: {normalized_name}. Unexpected error: {type(exc).__name__}: {exc}"
                 )
                 return
 
@@ -2757,19 +2657,12 @@ class AgentTuiApp(App):
             await _mount_error(str(exc))
             return
         except OSError as exc:
-            logger.warning(
-                "Filesystem error loading skill %r", normalized_name, exc_info=True
-            )
-            await _mount_error(
-                f"Could not load skill: {normalized_name}. Filesystem error: {exc}"
-            )
+            logger.warning("Filesystem error loading skill %r", normalized_name, exc_info=True)
+            await _mount_error(f"Could not load skill: {normalized_name}. Filesystem error: {exc}")
             return
         except Exception as exc:
             logger.warning("Error reading skill %r", normalized_name, exc_info=True)
-            await _mount_error(
-                f"Error loading skill: {normalized_name}. "
-                f"Unexpected error: {type(exc).__name__}: {exc}"
-            )
+            await _mount_error(f"Error loading skill: {normalized_name}. Unexpected error: {type(exc).__name__}: {exc}")
             return
 
         if content is None:
@@ -2782,8 +2675,7 @@ class AgentTuiApp(App):
 
         if not content.strip():
             await _mount_error(
-                f"Skill '{normalized_name}' has an empty SKILL.md file. "
-                "Add instructions to the file before invoking."
+                f"Skill '{normalized_name}' has an empty SKILL.md file. Add instructions to the file before invoking."
             )
             return
 
@@ -2794,9 +2686,7 @@ class AgentTuiApp(App):
             try:
                 await self._agent.invoke_skill(normalized_name, args)
             except Exception:
-                logger.debug(
-                    "invoke_skill() notification failed for %r", normalized_name
-                )
+                logger.debug("invoke_skill() notification failed for %r", normalized_name)
 
         await self._mount_message(
             SkillMessage(
@@ -2938,9 +2828,7 @@ class AgentTuiApp(App):
             await self._process_message(msg.text, msg.mode)
         except Exception:
             logger.exception("Failed to process queued message")
-            await self._mount_message(
-                ErrorMessage(f"Failed to process queued message: {msg.text[:60]}")
-            )
+            await self._mount_message(ErrorMessage(f"Failed to process queued message: {msg.text[:60]}"))
         finally:
             self._processing_pending = False
 
@@ -2972,10 +2860,7 @@ class AgentTuiApp(App):
             logger.exception("Failed to drain deferred actions during agent cleanup")
             with suppress(Exception):
                 await self._mount_message(
-                    ErrorMessage(
-                        "A deferred action failed after task completion. "
-                        "You may need to retry the operation."
-                    )
+                    ErrorMessage("A deferred action failed after task completion. You may need to retry the operation.")
                 )
 
         # Process next message from queue if any
@@ -3195,9 +3080,7 @@ class AgentTuiApp(App):
             )
             await self._mount_message(AppMessage(f"Could not load history: {e}"))
 
-    async def _mount_message(
-        self, widget: Static | AssistantMessage | ToolCallMessage | SkillMessage
-    ) -> None:
+    async def _mount_message(self, widget: Static | AssistantMessage | ToolCallMessage | SkillMessage) -> None:
         """Mount a message widget to the messages area.
 
         This method also stores the message data and handles pruning
@@ -3315,8 +3198,7 @@ class AgentTuiApp(App):
             await messages.remove_children()
         except NoMatches:
             logger.warning(
-                "Messages container (#messages) not found during clear; "
-                "UI may be out of sync with message store"
+                "Messages container (#messages) not found during clear; UI may be out of sync with message store"
             )
 
     def _pop_last_queued_message(self) -> None:
@@ -3337,14 +3219,12 @@ class AgentTuiApp(App):
             widget.remove()
         else:
             logger.warning(
-                "Queued-widget deque empty while pending-messages was not; "
-                "widget/message tracking may be out of sync"
+                "Queued-widget deque empty while pending-messages was not; widget/message tracking may be out of sync"
             )
 
         if not self._chat_input:
             logger.warning(
-                "Chat input unavailable during queue pop; "
-                "message text cannot be restored: %s",
+                "Chat input unavailable during queue pop; message text cannot be restored: %s",
                 msg.text[:60],
             )
             self.notify("Queued message discarded", timeout=2)
@@ -3373,9 +3253,7 @@ class AgentTuiApp(App):
         Args:
             action: The deferred action to queue.
         """
-        self._deferred_actions = [
-            a for a in self._deferred_actions if a.kind != action.kind
-        ]
+        self._deferred_actions = [a for a in self._deferred_actions if a.kind != action.kind]
         self._deferred_actions.append(action)
 
     async def _maybe_drain_deferred(self) -> None:
@@ -3398,10 +3276,7 @@ class AgentTuiApp(App):
                 label = action.kind.replace("_", " ")
                 with suppress(Exception):
                     await self._mount_message(
-                        ErrorMessage(
-                            f"Deferred {label} failed unexpectedly. "
-                            "You may need to retry the operation."
-                        )
+                        ErrorMessage(f"Deferred {label} failed unexpectedly. You may need to retry the operation.")
                     )
 
     def _cancel_worker(self, worker: Worker[None] | None) -> None:
@@ -3468,9 +3343,7 @@ class AgentTuiApp(App):
         """
         self._quit_pending = True
         quit_timeout = 3
-        self.notify(
-            f"Press {shortcut} again to quit", timeout=quit_timeout, markup=False
-        )
+        self.notify(f"Press {shortcut} again to quit", timeout=quit_timeout, markup=False)
         self.set_timer(quit_timeout, lambda: setattr(self, "_quit_pending", False))
 
     def action_interrupt(self) -> None:
@@ -3488,10 +3361,7 @@ class AgentTuiApp(App):
         """
         from agent_tui.entrypoints.widgets.thread_selector import ThreadSelectorScreen
 
-        if (
-            isinstance(self.screen, ThreadSelectorScreen)
-            and self.screen.is_delete_confirmation_open
-        ):
+        if isinstance(self.screen, ThreadSelectorScreen) and self.screen.is_delete_confirmation_open:
             self.screen.action_cancel()
             return
 
@@ -3587,9 +3457,7 @@ class AgentTuiApp(App):
         if inflight is not None:
             self._inflight_turn_stats = None
             if not inflight.wall_time_seconds:
-                inflight.wall_time_seconds = (
-                    time.monotonic() - self._inflight_turn_start
-                )
+                inflight.wall_time_seconds = time.monotonic() - self._inflight_turn_start
             self._session_stats.merge(inflight)
 
         # Discard queued messages so _cleanup_agent_task won't try to
@@ -3752,11 +3620,7 @@ class AgentTuiApp(App):
         """Route unfocused paste events to chat input for drag/drop reliability."""
         if not self._chat_input:
             return
-        if (
-            self._pending_approval_widget
-            or self._pending_ask_user_widget
-            or self._is_input_focused()
-        ):
+        if self._pending_approval_widget or self._pending_ask_user_widget or self._is_input_focused():
             return
         if self._chat_input.handle_external_paste(event.text):
             event.prevent_default()
@@ -3838,9 +3702,7 @@ class AgentTuiApp(App):
                             ),
                         )
                     )
-                    self.notify(
-                        "Model will switch after current task completes.", timeout=3
-                    )
+                    self.notify("Model will switch after current task completes.", timeout=3)
                 else:
                     self.call_later(
                         partial(
@@ -3917,8 +3779,7 @@ class AgentTuiApp(App):
                         ok = await asyncio.to_thread(save_theme_preference, result)
                         if not ok:
                             self.notify(
-                                "Theme applied for this session but could not"
-                                " be saved. Check logs for details.",
+                                "Theme applied for this session but could not be saved. Check logs for details.",
                                 severity="warning",
                                 timeout=6,
                                 markup=False,
@@ -3929,8 +3790,7 @@ class AgentTuiApp(App):
                             exc_info=True,
                         )
                         self.notify(
-                            "Theme applied for this session but could not"
-                            " be saved. Check logs for details.",
+                            "Theme applied for this session but could not be saved. Check logs for details.",
                             severity="warning",
                             timeout=6,
                             markup=False,
@@ -4023,6 +3883,7 @@ class AgentTuiApp(App):
         if self._agent is not None:
             try:
                 raw_threads = await self._agent.get_threads()
+
                 def _to_thread_info(t: dict[str, Any]) -> ThreadInfo:
                     ti = ThreadInfo(
                         thread_id=t.get("id") or t.get("thread_id") or "",
@@ -4052,9 +3913,7 @@ class AgentTuiApp(App):
                             execute=partial(self._resume_thread, result),
                         )
                     )
-                    self.notify(
-                        "Thread will switch after current task completes.", timeout=3
-                    )
+                    self.notify("Thread will switch after current task completes.", timeout=3)
                 else:
                     self.call_later(self._resume_thread, result)
             if self._chat_input:
@@ -4101,15 +3960,11 @@ class AgentTuiApp(App):
             thread_id: The thread ID to resume.
         """
         if not self._agent:
-            await self._mount_message(
-                AppMessage("Cannot switch threads: no active agent")
-            )
+            await self._mount_message(AppMessage("Cannot switch threads: no active agent"))
             return
 
         if not self._session_state:
-            await self._mount_message(
-                AppMessage("Cannot switch threads: no active session")
-            )
+            await self._mount_message(AppMessage("Cannot switch threads: no active session"))
             return
 
         # Skip if already on this thread
@@ -4161,10 +4016,7 @@ class AgentTuiApp(App):
             if prefetched_payload is None:
                 logger.exception("Failed to prefetch history for thread %s", thread_id)
                 await self._mount_message(
-                    AppMessage(
-                        f"Failed to switch to thread {thread_id}: {exc}. "
-                        "Use /threads to try again."
-                    )
+                    AppMessage(f"Failed to switch to thread {thread_id}: {exc}. Use /threads to try again.")
                 )
                 return
             logger.exception("Failed to switch to thread %s", thread_id)
@@ -4174,8 +4026,7 @@ class AgentTuiApp(App):
             self._update_welcome_banner(
                 prev_session_thread,
                 missing_message=(
-                    "Welcome banner not found during rollback to thread %s; "
-                    "banner may display stale thread ID"
+                    "Welcome banner not found during rollback to thread %s; banner may display stale thread ID"
                 ),
                 warn_if_missing=True,
             )
@@ -4186,10 +4037,7 @@ class AgentTuiApp(App):
                 await self._load_thread_history(thread_id=prev_session_thread)
             except Exception:  # Resilient session state saving
                 rollback_restore_failed = True
-                msg = (
-                    "Could not restore previous thread history after failed "
-                    "switch to %s"
-                )
+                msg = "Could not restore previous thread history after failed switch to %s"
                 logger.warning(msg, thread_id, exc_info=True)
             error_message = f"Failed to switch to thread {thread_id}: {exc}."
             if rollback_restore_failed:
@@ -4232,9 +4080,7 @@ class AgentTuiApp(App):
 
     async def _set_default_model(self, model_spec: str) -> None:
         """No-op stub — default model persistence not implemented in scaffold."""
-        await self._mount_message(
-            AppMessage(f"Default model set to {model_spec.removeprefix(':')}")
-        )
+        await self._mount_message(AppMessage(f"Default model set to {model_spec.removeprefix(':')}"))
 
     async def _clear_default_model(self) -> None:
         """No-op stub — default model persistence not implemented in scaffold."""
@@ -4255,6 +4101,7 @@ class AgentTuiApp(App):
             # First chunk — create widget and schedule mount.
             widget = AssistantMessage()
             self._current_assistant_widget = widget
+
             # Mount the widget and then write the first chunk once it is live.
             async def _mount_and_write(chunk: str = text) -> None:
                 await self._mount_message(widget)
@@ -4290,9 +4137,7 @@ class AgentTuiApp(App):
         self._current_assistant_widget = None
         self._current_assistant_msg_id = None
 
-    async def request_tool_approval(
-        self, tool_name: str, tool_args: dict, tool_id: str
-    ) -> bool:
+    async def request_tool_approval(self, tool_name: str, tool_args: dict, tool_id: str) -> bool:
         """Push approval modal, return True/False.
 
         Called by AgentAdapter on TOOL_CALL events. Delegates to
@@ -4307,9 +4152,7 @@ class AgentTuiApp(App):
             return False
         return result.get("type") == "approve"
 
-    def show_tool_result(
-        self, tool_name: str, tool_output: str, tool_id: str
-    ) -> None:
+    def show_tool_result(self, tool_name: str, tool_output: str, tool_id: str) -> None:
         """Mount tool result widget.
 
         Called by AgentAdapter on TOOL_RESULT events. Mounts a ToolCallMessage
@@ -4370,6 +4213,51 @@ class AgentTuiApp(App):
         Called by AgentAdapter on ERROR events or unexpected exceptions.
         """
         self.call_later(self._mount_message, ErrorMessage(text))
+
+    def show_plan_step(self, step_text: str, current_step: int, total_steps: int) -> None:
+        """Show planning step indicator.
+
+        Called by AgentAdapter on PLAN_STEP events.
+        Phase 5+ will implement proper UI. For now, just log.
+        """
+        logger.debug(
+            "Plan step %d/%d: %s",
+            current_step,
+            total_steps,
+            step_text,
+        )
+
+    def show_subagent_started(self, subagent_name: str) -> None:
+        """Show subagent activity indicator.
+
+        Called by AgentAdapter on SUBAGENT_START events.
+        Phase 5+ will implement proper UI. For now, just log.
+        """
+        logger.debug("Subagent started: %s", subagent_name)
+
+    def show_subagent_finished(self, subagent_name: str) -> None:
+        """Show subagent completed indicator.
+
+        Called by AgentAdapter on SUBAGENT_END events.
+        Phase 5+ will implement proper UI. For now, just log.
+        """
+        logger.debug("Subagent finished: %s", subagent_name)
+
+    def show_context_summarized(self, token_count: int) -> None:
+        """Show context was summarized.
+
+        Called by AgentAdapter on CONTEXT_SUMMARIZED events.
+        Phase 6+ will implement proper UI. For now, just log.
+        """
+        logger.debug("Context summarized, token count: %d", token_count)
+
+    def pause_for_human_input(self) -> None:
+        """Pause UI for human input during interrupt.
+
+        Called by AgentAdapter on INTERRUPT events.
+        Phase 8+ will implement proper interrupt handling. For now, just log.
+        """
+        logger.debug("Agent paused for human input")
 
 
 @dataclass(frozen=True)

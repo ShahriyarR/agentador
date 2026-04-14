@@ -24,16 +24,12 @@ class AgentAdapter:
         self.agent = agent
         self.app = app
 
-    async def run_task(
-        self, message: str, *, thread_id: str | None = None
-    ) -> None:
+    async def run_task(self, message: str, *, thread_id: str | None = None) -> None:
         """Stream events from the agent and dispatch to the app."""
         self.app.set_status("thinking")
 
         try:
-            async for event in self.agent.stream(
-                message, thread_id=thread_id
-            ):
+            async for event in self.agent.stream(message, thread_id=thread_id):
                 await self._dispatch(event)
         except Exception:
             logger.exception("Agent stream error")
@@ -58,24 +54,40 @@ class AgentAdapter:
                 await self.agent.approve_tool(event.tool_id, approved)
 
             case EventType.TOOL_RESULT:
-                self.app.show_tool_result(
-                    event.tool_name, event.tool_output, event.tool_id
-                )
+                self.app.show_tool_result(event.tool_name, event.tool_output, event.tool_id)
 
             case EventType.ASK_USER:
                 answer = await self.app.ask_user(event.question)
                 await self.agent.answer_question(answer)
 
             case EventType.TOKEN_UPDATE:
-                self.app.update_token_display(
-                    event.token_count, event.context_limit
-                )
+                self.app.update_token_display(event.token_count, event.context_limit)
 
             case EventType.STATUS_UPDATE:
                 self.app.set_status(event.status_text)
 
             case EventType.ERROR:
                 self.app.show_error(event.text)
+
+            case EventType.PLAN_STEP:
+                logger.debug(
+                    "Plan step %d/%d: %s",
+                    event.plan_current_step,
+                    event.plan_total_steps,
+                    event.plan_step_text,
+                )
+
+            case EventType.SUBAGENT_START:
+                logger.debug("Subagent started: %s", event.subagent_name)
+
+            case EventType.SUBAGENT_END:
+                logger.debug("Subagent ended: %s", event.subagent_name)
+
+            case EventType.CONTEXT_SUMMARIZED:
+                logger.debug("Context summarized, token count: %d", event.token_count)
+
+            case EventType.INTERRUPT:
+                logger.debug("Agent interrupted")
 
             case _:
                 logger.warning("Unknown event type: %s", event.type)

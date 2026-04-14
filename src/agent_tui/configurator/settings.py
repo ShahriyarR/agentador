@@ -41,7 +41,6 @@ _bootstrap_start_path: Path | None = None
 """Working directory captured at bootstrap time for dotenv and project discovery."""
 
 
-
 def _find_dotenv_from_start_path(start_path: Path) -> Path | None:
     """Find the nearest `.env` file from an explicit start path upward.
 
@@ -111,10 +110,7 @@ def _load_dotenv(*, start_path: Path | None = None) -> bool:
         else:
             dotenv_path = _find_dotenv_from_start_path(start_path)
             if dotenv_path is not None:
-                loaded = (
-                    dotenv.load_dotenv(dotenv_path=dotenv_path, override=False)
-                    or loaded
-                )
+                loaded = dotenv.load_dotenv(dotenv_path=dotenv_path, override=False) or loaded
     except (OSError, ValueError):
         logger.warning(
             "Could not read project dotenv at %s; project env vars will not be loaded",
@@ -127,9 +123,7 @@ def _load_dotenv(*, start_path: Path | None = None) -> bool:
     # try/except wraps both is_file() and load_dotenv() to cover the TOCTOU
     # window where the file can vanish between stat and open.
     try:
-        if _GLOBAL_DOTENV_PATH.is_file() and dotenv.load_dotenv(
-            dotenv_path=_GLOBAL_DOTENV_PATH, override=False
-        ):
+        if _GLOBAL_DOTENV_PATH.is_file() and dotenv.load_dotenv(dotenv_path=_GLOBAL_DOTENV_PATH, override=False):
             loaded = True
             logger.debug("Loaded global dotenv: %s", _GLOBAL_DOTENV_PATH)
     except (OSError, ValueError):
@@ -172,8 +166,7 @@ def _ensure_bootstrap() -> None:
             _load_dotenv(start_path=_bootstrap_start_path)
         except Exception:
             logger.exception(
-                "Bootstrap failed; .env values may be missing. "
-                "The CLI will proceed with environment as-is.",
+                "Bootstrap failed; .env values may be missing. The CLI will proceed with environment as-is.",
             )
         finally:
             _bootstrap_done = True
@@ -350,19 +343,11 @@ def _parse_extra_skills_dirs(
     """
     # Env var takes precedence when set
     if env_raw:
-        dirs = [
-            Path(p.strip()).expanduser().resolve()
-            for p in env_raw.split(":")
-            if p.strip()
-        ]
+        dirs = [Path(p.strip()).expanduser().resolve() for p in env_raw.split(":") if p.strip()]
         return dirs or None
 
     if config_toml_dirs:
-        dirs = [
-            Path(p).expanduser().resolve()
-            for p in config_toml_dirs
-            if isinstance(p, str) and p.strip()
-        ]
+        dirs = [Path(p).expanduser().resolve() for p in config_toml_dirs if isinstance(p, str) and p.strip()]
         return dirs or None
 
     return None
@@ -438,6 +423,7 @@ class Settings:
         Returns:
             Settings instance with detected configuration
         """
+
         # Detect API keys (normalize empty strings to None).
         # Check AGENT_TUI_<NAME> prefix first, then fall back to <NAME>.
         def _resolve(name: str) -> str | None:
@@ -561,9 +547,7 @@ class Settings:
 
             project_root = find_project_root(start_path)
         except OSError:
-            logger.warning(
-                "Could not detect project root during reload; keeping previous value"
-            )
+            logger.warning("Could not detect project root during reload; keeping previous value")
             project_root = previous["project_root"]
 
         def _resolve(name: str) -> str | None:
@@ -598,10 +582,7 @@ class Settings:
             old_value = previous[field]
             new_value = refreshed[field]
             if old_value != new_value:
-                changes.append(
-                    f"{field}: {_display(field, old_value)} -> "
-                    f"{_display(field, new_value)}"
-                )
+                changes.append(f"{field}: {_display(field, old_value)} -> {_display(field, new_value)}")
         return changes
 
     @property
@@ -638,6 +619,15 @@ class Settings:
     def has_tavily(self) -> bool:
         """Check if Tavily API key is configured."""
         return self.tavily_api_key is not None
+
+    @property
+    def deepagents_model(self) -> str:
+        """Default model for DeepAgents when using --agent deepagents.
+
+        Can be overridden via DEEPAGENTS_MODEL environment variable.
+        Format: provider:model (e.g., 'openai:gpt-4o', 'anthropic:claude-sonnet-4-6')
+        """
+        return os.environ.get("DEEPAGENTS_MODEL", "openai:gpt-4o")
 
     @property
     def user_agent_tui_dir(self) -> Path:
