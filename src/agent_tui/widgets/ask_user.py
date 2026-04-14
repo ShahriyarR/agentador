@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from textual import events
     from textual.app import ComposeResult
 
-    from agent_tui._ask_user_types import (
+    from agent_tui.domain.ask_user_types import (
         AskUserWidgetResult,
         Choice,
         Question,

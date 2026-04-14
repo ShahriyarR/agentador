@@ -19,7 +19,7 @@ from textual.reactive import reactive
 from textual.widgets import Static, TextArea
 
 from agent_tui import theme
-from agent_tui.command_registry import SLASH_COMMANDS
+from agent_tui.domain.command_registry import SLASH_COMMANDS
 from agent_tui.config import (
     MODE_DISPLAY_GLYPHS,
     MODE_PREFIXES,

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from agent_tui.protocol import AgentEvent, AgentProtocol, EventType
+from agent_tui.domain.protocol import AgentEvent, AgentProtocol, EventType
 
 if TYPE_CHECKING:
     pass  # future: type hint for AgentTuiApp

@@ -6,7 +6,7 @@ import asyncio
 from collections.abc import AsyncIterator
 from typing import Any
 
-from agent_tui.protocol import AgentEvent, EventType
+from agent_tui.domain.protocol import AgentEvent, EventType
 
 
 class StubAgent:

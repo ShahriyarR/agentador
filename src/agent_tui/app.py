@@ -30,8 +30,8 @@ from textual.theme import Theme
 from textual.widgets import Static
 
 from agent_tui import theme
-from agent_tui._cli_context import CLIContext
-from agent_tui._session_stats import (
+from agent_tui.domain.cli_context import CLIContext
+from agent_tui.domain.session_stats import (
     SessionStats,
     SpinnerStatus,
     format_token_count,
@@ -66,7 +66,7 @@ from agent_tui.widgets.welcome import WelcomeBanner
 logger = logging.getLogger(__name__)
 _monotonic = time.monotonic
 
-from agent_tui.protocol import AgentProtocol
+from agent_tui.domain.protocol import AgentProtocol
 from agent_tui.adapter import AgentAdapter
 
 if TYPE_CHECKING:
@@ -78,8 +78,8 @@ if TYPE_CHECKING:
     from textual.widget import Widget
     from textual.worker import Worker
 
-    from agent_tui._ask_user_types import AskUserWidgetResult, Question
-    from agent_tui.mcp_tools import MCPServerInfo
+    from agent_tui.domain.ask_user_types import AskUserWidgetResult, Question
+    from agent_tui.domain.mcp_tools import MCPServerInfo
     from agent_tui.skills.load import ExtendedSkillMetadata
     from agent_tui.widgets.approval import ApprovalMenu
     from agent_tui.widgets.ask_user import AskUserMenu
@@ -744,7 +744,7 @@ class AgentTuiApp(App):
 
         # Apply any skill commands discovered before the widget was mounted
         if self._discovered_skills:
-            from agent_tui.command_registry import (
+            from agent_tui.domain.command_registry import (
                 SLASH_COMMANDS,
                 build_skill_commands,
             )
@@ -953,7 +953,7 @@ class AgentTuiApp(App):
         Runs filesystem I/O in a thread to avoid blocking the event loop.
         Also merges skills reported by the agent protocol via ``get_skills()``.
         """
-        from agent_tui.command_registry import SLASH_COMMANDS, build_skill_commands
+        from agent_tui.domain.command_registry import SLASH_COMMANDS, build_skill_commands
 
         # Also fetch skills from agent protocol (non-blocking, best-effort)
         protocol_skills: list[dict[str, Any]] = []
@@ -1135,7 +1135,7 @@ class AgentTuiApp(App):
         from agent_tui.clipboard import (
             copy_selection_to_clipboard,  # noqa: F401
         )
-        from agent_tui.command_registry import ALWAYS_IMMEDIATE  # noqa: F401
+        from agent_tui.domain.command_registry import ALWAYS_IMMEDIATE  # noqa: F401
         from agent_tui.config import settings  # noqa: F401
         from agent_tui.hooks import dispatch_hook  # noqa: F401
         from agent_tui.model_config import ModelSpec  # noqa: F401
@@ -1977,7 +1977,7 @@ class AgentTuiApp(App):
         Returns:
             `True` if the command should bypass the busy-state queue.
         """
-        from agent_tui.command_registry import (
+        from agent_tui.domain.command_registry import (
             BYPASS_WHEN_CONNECTING,
             IMMEDIATE_UI,
             SIDE_EFFECT_FREE,
@@ -2005,7 +2005,7 @@ class AgentTuiApp(App):
         await dispatch_hook("user.prompt", {})
 
         # /quit and /q always execute immediately, even mid-thread-switch.
-        from agent_tui.command_registry import ALWAYS_IMMEDIATE
+        from agent_tui.domain.command_registry import ALWAYS_IMMEDIATE
 
         if mode == "command" and value.lower().strip() in ALWAYS_IMMEDIATE:
             self.exit()
@@ -2818,7 +2818,7 @@ class AgentTuiApp(App):
         Args:
             command: The full command string (e.g., `/skill:web-research find X`).
         """
-        from agent_tui.command_registry import parse_skill_command
+        from agent_tui.domain.command_registry import parse_skill_command
 
         skill_name, args = parse_skill_command(command)
         await self._invoke_skill(skill_name, args, command=command)
@@ -3979,7 +3979,7 @@ class AgentTuiApp(App):
 
     async def _show_mcp_viewer(self) -> None:
         """Show read-only MCP server/tool viewer as a modal screen."""
-        from agent_tui.mcp_tools import MCPServerInfo, MCPTool
+        from agent_tui.domain.mcp_tools import MCPServerInfo, MCPTool
         from agent_tui.widgets.mcp_viewer import MCPViewerScreen
 
         server_info = self._mcp_server_info or []
@@ -4329,7 +4329,7 @@ class AgentTuiApp(App):
         into the Question TypedDict format expected by _request_ask_user, then
         waits for the user response.
         """
-        from agent_tui._ask_user_types import Question
+        from agent_tui.domain.ask_user_types import Question
 
         questions: list[Question] = [{"question": question, "type": "text"}]
         result_future = await self._request_ask_user(questions)
