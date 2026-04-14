@@ -32,7 +32,7 @@ dependencies = [
 agent-tui = "agent_tui:cli_main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["agent_tui"]
+packages = ["src/agent_tui"]
 
 [tool.ruff]
 line-length = 120

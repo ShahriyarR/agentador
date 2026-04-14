@@ -1,6 +1,6 @@
 """Tests for AgentProtocol and event types."""
 
-from agent_tui.protocol import AgentEvent, AgentProtocol, EventType
+from agent_tui.domain.protocol import AgentEvent, AgentProtocol, EventType
 
 
 def test_event_type_values():
