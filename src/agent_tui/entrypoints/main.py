@@ -156,7 +156,7 @@ def cli_main() -> None:
         # Bootstrap config (triggers _ensure_bootstrap via settings access)
         from agent_tui.configurator.settings import settings  # noqa: F401
 
-        from agent_tui.app import AgentTuiApp
+        from agent_tui.entrypoints.app import AgentTuiApp
         from agent_tui.services.stub_agent import StubAgent
 
         agent = StubAgent()

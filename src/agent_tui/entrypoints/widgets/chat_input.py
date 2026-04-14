@@ -23,13 +23,13 @@ from agent_tui.domain.command_registry import SLASH_COMMANDS
 from agent_tui.configurator.glyphs import is_ascii_mode
 from agent_tui.configurator.settings import MODE_DISPLAY_GLYPHS, MODE_PREFIXES, PREFIX_TO_MODE
 from agent_tui.services.input import IMAGE_PLACEHOLDER_PATTERN, VIDEO_PLACEHOLDER_PATTERN
-from agent_tui.widgets.autocomplete import (
+from agent_tui.entrypoints.widgets.autocomplete import (
     CompletionResult,
     FuzzyFileController,
     MultiCompletionManager,
     SlashCommandController,
 )
-from agent_tui.widgets.history import HistoryManager
+from agent_tui.entrypoints.widgets.history import HistoryManager
 
 logger = logging.getLogger(__name__)
 

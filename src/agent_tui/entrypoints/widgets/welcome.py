@@ -21,7 +21,7 @@ from agent_tui.configurator.console import (
 )
 from agent_tui.configurator.glyphs import get_glyphs
 from agent_tui.configurator.version import __version__
-from agent_tui.widgets._links import open_style_link
+from agent_tui.entrypoints.widgets._links import open_style_link
 
 _TIPS: list[str] = [
     "Use @ to reference files and / for commands",

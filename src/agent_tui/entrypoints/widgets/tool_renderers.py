@@ -5,14 +5,14 @@ from __future__ import annotations
 import difflib
 from typing import TYPE_CHECKING, Any
 
-from agent_tui.widgets.tool_widgets import (
+from agent_tui.entrypoints.widgets.tool_widgets import (
     EditFileApprovalWidget,
     GenericApprovalWidget,
     WriteFileApprovalWidget,
 )
 
 if TYPE_CHECKING:
-    from agent_tui.widgets.tool_widgets import ToolApprovalWidget
+    from agent_tui.entrypoints.widgets.tool_widgets import ToolApprovalWidget
 
 
 class ToolRenderer:

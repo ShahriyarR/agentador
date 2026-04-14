@@ -29,7 +29,7 @@ def __getattr__(name: str) -> Callable[[], None]:
         AttributeError: If *name* is not a lazily-provided attribute.
     """
     if name == "cli_main":
-        from agent_tui.main import cli_main
+        from agent_tui.entrypoints.main import cli_main
 
         return cli_main
     msg = f"module {__name__!r} has no attribute {name!r}"

@@ -168,7 +168,7 @@ class MessageData:
             The appropriate message widget for this data.
         """
         # Import here to avoid circular imports
-        from agent_tui.widgets.messages import (
+        from agent_tui.entrypoints.widgets.messages import (
             AppMessage,
             AssistantMessage,
             DiffMessage,
@@ -247,7 +247,7 @@ class MessageData:
         """
         # Deferred: prevents import-order issue — both modules live in the
         # widgets package, and messages is re-exported from widgets/__init__.
-        from agent_tui.widgets.messages import (
+        from agent_tui.entrypoints.widgets.messages import (
             AppMessage,
             AssistantMessage,
             DiffMessage,

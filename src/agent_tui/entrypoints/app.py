@@ -43,15 +43,15 @@ from agent_tui.domain.session_stats import (
 # after user interaction begins.
 from agent_tui.configurator.glyphs import is_ascii_mode
 from agent_tui.configurator.version import CHANGELOG_URL, DOCS_URL
-from agent_tui.widgets.chat_input import ChatInput
-from agent_tui.widgets.loading import LoadingWidget
-from agent_tui.widgets.message_store import (
+from agent_tui.entrypoints.widgets.chat_input import ChatInput
+from agent_tui.entrypoints.widgets.loading import LoadingWidget
+from agent_tui.entrypoints.widgets.message_store import (
     MessageData,
     MessageStore,
     MessageType,
     ToolStatus,
 )
-from agent_tui.widgets.messages import (
+from agent_tui.entrypoints.widgets.messages import (
     AppMessage,
     AssistantMessage,
     ErrorMessage,
@@ -60,8 +60,8 @@ from agent_tui.widgets.messages import (
     ToolCallMessage,
     UserMessage,
 )
-from agent_tui.widgets.status import StatusBar
-from agent_tui.widgets.welcome import WelcomeBanner
+from agent_tui.entrypoints.widgets.status import StatusBar
+from agent_tui.entrypoints.widgets.welcome import WelcomeBanner
 
 logger = logging.getLogger(__name__)
 _monotonic = time.monotonic
@@ -81,8 +81,8 @@ if TYPE_CHECKING:
     from agent_tui.domain.ask_user_types import AskUserWidgetResult, Question
     from agent_tui.domain.mcp_tools import MCPServerInfo
     from agent_tui.services.skills.load import ExtendedSkillMetadata
-    from agent_tui.widgets.approval import ApprovalMenu
-    from agent_tui.widgets.ask_user import AskUserMenu
+    from agent_tui.entrypoints.widgets.approval import ApprovalMenu
+    from agent_tui.entrypoints.widgets.ask_user import AskUserMenu
 
 # iTerm2 Cursor Guide Workaround
 # ===============================
@@ -915,7 +915,7 @@ class AgentTuiApp(App):
     async def _check_optional_tools_background(self) -> None:
         """Check for optional tools in a thread and notify if missing."""
         try:
-            from agent_tui.main import (
+            from agent_tui.entrypoints.main import (
                 check_optional_tools,
                 format_tool_warning_tui,
             )
@@ -1157,12 +1157,12 @@ class AgentTuiApp(App):
         # Widgets deferred from app.py module level — a failure here indicates
         # a packaging or code bug (same as the block above), so we let
         # exceptions propagate.
-        from agent_tui.widgets.approval import ApprovalMenu  # noqa: F401
-        from agent_tui.widgets.ask_user import AskUserMenu  # noqa: F401
-        from agent_tui.widgets.model_selector import (
+        from agent_tui.entrypoints.widgets.approval import ApprovalMenu  # noqa: F401
+        from agent_tui.entrypoints.widgets.ask_user import AskUserMenu  # noqa: F401
+        from agent_tui.entrypoints.widgets.model_selector import (
             ModelSelectorScreen,  # noqa: F401
         )
-        from agent_tui.widgets.thread_selector import (  # noqa: F401
+        from agent_tui.entrypoints.widgets.thread_selector import (  # noqa: F401
             DeleteThreadConfirmScreen,
             ThreadSelectorScreen,
         )
@@ -1676,7 +1676,7 @@ class AgentTuiApp(App):
                 await asyncio.sleep(0.1)
 
         # Create menu with unique ID to avoid conflicts
-        from agent_tui.widgets.approval import ApprovalMenu
+        from agent_tui.entrypoints.widgets.approval import ApprovalMenu
 
         unique_id = f"approval-menu-{uuid.uuid4().hex[:8]}"
         menu = ApprovalMenu(action_requests, assistant_id, id=unique_id)
@@ -1862,7 +1862,7 @@ class AgentTuiApp(App):
                     break
                 await asyncio.sleep(0.1)
 
-        from agent_tui.widgets.ask_user import AskUserMenu
+        from agent_tui.entrypoints.widgets.ask_user import AskUserMenu
 
         unique_id = f"ask-user-menu-{uuid.uuid4().hex[:8]}"
         menu = AskUserMenu(questions, id=unique_id)
@@ -3486,7 +3486,7 @@ class AgentTuiApp(App):
         7. If queued messages exist, pop the last one (LIFO)
         8. If agent is running, interrupt it
         """
-        from agent_tui.widgets.thread_selector import ThreadSelectorScreen
+        from agent_tui.entrypoints.widgets.thread_selector import ThreadSelectorScreen
 
         if (
             isinstance(self.screen, ThreadSelectorScreen)
@@ -3546,7 +3546,7 @@ class AgentTuiApp(App):
 
     def action_quit_app(self) -> None:
         """Handle quit action (Ctrl+D)."""
-        from agent_tui.widgets.thread_selector import (
+        from agent_tui.entrypoints.widgets.thread_selector import (
             DeleteThreadConfirmScreen,
             ThreadSelectorScreen,
         )
@@ -3627,7 +3627,7 @@ class AgentTuiApp(App):
         web search, URL fetch) run without prompting. Updates the status
         bar indicator and session state.
         """
-        from agent_tui.widgets.thread_selector import ThreadSelectorScreen
+        from agent_tui.entrypoints.widgets.thread_selector import ThreadSelectorScreen
 
         if isinstance(self.screen, ThreadSelectorScreen):
             self.screen.action_focus_previous_filter()
@@ -3810,7 +3810,7 @@ class AgentTuiApp(App):
         from functools import partial
 
         from agent_tui.configurator.settings import settings
-        from agent_tui.widgets.model_selector import ModelSelectorScreen
+        from agent_tui.entrypoints.widgets.model_selector import ModelSelectorScreen
 
         # Fetch available models from the agent protocol
         protocol_models: list[dict[str, Any]] | None = None
@@ -3895,7 +3895,7 @@ class AgentTuiApp(App):
 
     async def _show_theme_selector(self) -> None:
         """Show interactive theme selector as a modal screen."""
-        from agent_tui.widgets.theme_selector import ThemeSelectorScreen
+        from agent_tui.entrypoints.widgets.theme_selector import ThemeSelectorScreen
 
         # Capture scroll state.  The submit handler may have already caused
         # a reflow that re-anchored to the bottom, so we save the *current*
@@ -3950,7 +3950,7 @@ class AgentTuiApp(App):
     async def _show_notification_settings(self) -> None:
         """Show notification settings modal."""
         from agent_tui.configurator.model_config import is_warning_suppressed
-        from agent_tui.widgets.notification_settings import (
+        from agent_tui.entrypoints.widgets.notification_settings import (
             WARNING_TOGGLES,
             NotificationSettingsScreen,
         )
@@ -3980,7 +3980,7 @@ class AgentTuiApp(App):
     async def _show_mcp_viewer(self) -> None:
         """Show read-only MCP server/tool viewer as a modal screen."""
         from agent_tui.domain.mcp_tools import MCPServerInfo, MCPTool
-        from agent_tui.widgets.mcp_viewer import MCPViewerScreen
+        from agent_tui.entrypoints.widgets.mcp_viewer import MCPViewerScreen
 
         server_info = self._mcp_server_info or []
 
@@ -4013,7 +4013,7 @@ class AgentTuiApp(App):
 
         from agent_tui.services.sessions import get_cached_threads, get_thread_limit
         from agent_tui.services.sessions import ThreadInfo
-        from agent_tui.widgets.thread_selector import ThreadSelectorScreen
+        from agent_tui.entrypoints.widgets.thread_selector import ThreadSelectorScreen
 
         current = self._session_state.thread_id if self._session_state else None
         thread_limit = get_thread_limit()

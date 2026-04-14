@@ -29,7 +29,7 @@ from agent_tui.common.unicode_security import (
     strip_dangerous_unicode,
     summarize_issues,
 )
-from agent_tui.widgets.tool_renderers import get_renderer
+from agent_tui.entrypoints.widgets.tool_renderers import get_renderer
 
 # Max length for truncated shell command display
 _SHELL_COMMAND_TRUNCATE_LENGTH: int = 120
