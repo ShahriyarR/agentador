@@ -23,14 +23,14 @@ class DeepAgentsAdapter:
 
     def __init__(
         self,
-        model: str = "openai:gpt-4o-mini",
+        model: str = "openai:o3",
         *,
         api_key: str | None = None,
     ) -> None:
         """Initialize the adapter.
 
         Args:
-            model: The model to use for DeepAgents. Defaults to "openai:gpt-4o-mini".
+            model: The model to use for DeepAgents. Defaults to "openai:o3".
             api_key: Optional API key override.
         """
         self._model = model
@@ -237,7 +237,7 @@ class DeepAgentsAdapter:
                 "description": "OpenAI GPT-4o model",
             },
             {
-                "name": "openai:gpt-4o-mini",
+                "name": "openai:gpt-4o",
                 "provider": "openai",
                 "context_limit": 128_000,
                 "description": "OpenAI GPT-4o Mini model",
