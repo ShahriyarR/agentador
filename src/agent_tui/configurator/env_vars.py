@@ -37,6 +37,9 @@ DEBUG = "AGENT_TUI_DEBUG"
 DEBUG_FILE = "AGENT_TUI_DEBUG_FILE"
 """Path for the debug log file (default: `/tmp/deepagents_debug.log`)."""
 
+DEEPAGENTS_ALLOWED_DIRS = "AGENT_TUI_DEEPAGENTS_ALLOWED_DIRS"
+"""Colon-separated directories that DeepAgents can access for file operations."""
+
 EXTRA_SKILLS_DIRS = "AGENT_TUI_EXTRA_SKILLS_DIRS"
 """Colon-separated paths added to the skill containment allowlist."""
 

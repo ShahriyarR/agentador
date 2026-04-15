@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import re
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from agent_tui.domain.protocol import AgentEvent, AgentProtocol, EventType
@@ -11,6 +13,47 @@ if TYPE_CHECKING:
     pass  # future: type hint for AgentTuiApp
 
 logger = logging.getLogger(__name__)
+
+FILE_TOOL_NAMES = frozenset({"read_file", "write_file", "edit_file", "glob", "grep"})
+
+
+def _extract_file_paths_from_tool_args(tool_name: str, tool_args: dict[str, Any]) -> list[Path]:
+    """Extract file paths from tool arguments.
+
+    Args:
+        tool_name: Name of the file tool.
+        tool_args: Dictionary of tool arguments.
+
+    Returns:
+        List of file paths extracted from the tool arguments.
+    """
+    paths: list[Path] = []
+
+    if tool_name in ("read_file", "write_file", "edit_file"):
+        if "path" in tool_args:
+            paths.append(Path(tool_args["path"]))
+
+    elif tool_name == "glob":
+        if "pattern" in tool_args:
+            pattern = tool_args["pattern"]
+            dir_pattern = pattern
+            if "/" in pattern:
+                dir_pattern = re.match(r"^(.*)/[^/]+$", pattern)
+                if dir_pattern:
+                    dir_pattern = dir_pattern.group(1)
+                else:
+                    dir_pattern = pattern
+            if dir_pattern not in (".", "./"):
+                paths.append(Path(dir_pattern))
+
+    elif tool_name == "grep":
+        if "path" in tool_args:
+            paths.append(Path(tool_args["path"]))
+        elif "file_paths" in tool_args:
+            for fp in tool_args["file_paths"]:
+                paths.append(Path(fp))
+
+    return paths
 
 
 class AgentAdapter:
@@ -46,6 +89,16 @@ class AgentAdapter:
                 self.app.finalize_assistant_message()
 
             case EventType.TOOL_CALL:
+                if event.tool_name in FILE_TOOL_NAMES:
+                    from agent_tui.configurator.settings import settings
+
+                    paths = _extract_file_paths_from_tool_args(event.tool_name, event.tool_args)
+                    for path in paths:
+                        if not settings.deepagents_file_tool_allowed(path):
+                            await self.agent.approve_tool(event.tool_id, False)
+                            self.app.show_error(f"Path not allowed: {path}")
+                            return
+
                 approved = await self.app.request_tool_approval(
                     tool_name=event.tool_name,
                     tool_args=event.tool_args,
@@ -70,21 +123,20 @@ class AgentAdapter:
                 self.app.show_error(event.text)
 
             case EventType.PLAN_STEP:
-                logger.debug(
-                    "Plan step %d/%d: %s",
+                self.app.show_plan_step(
+                    event.plan_step_text,
                     event.plan_current_step,
                     event.plan_total_steps,
-                    event.plan_step_text,
                 )
 
             case EventType.SUBAGENT_START:
-                logger.debug("Subagent started: %s", event.subagent_name)
+                self.app.show_subagent_started(event.subagent_name)
 
             case EventType.SUBAGENT_END:
-                logger.debug("Subagent ended: %s", event.subagent_name)
+                self.app.show_subagent_finished(event.subagent_name)
 
             case EventType.CONTEXT_SUMMARIZED:
-                logger.debug("Context summarized, token count: %d", event.token_count)
+                self.app.show_context_summarized(event.token_count)
 
             case EventType.INTERRUPT:
                 logger.debug("Agent interrupted")

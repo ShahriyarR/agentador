@@ -353,6 +353,22 @@ def _parse_extra_skills_dirs(
     return None
 
 
+def _parse_deepagents_allowed_dirs(env_raw: str | None) -> list[Path] | None:
+    """Parse DeepAgents allowed directories from env var.
+
+    Args:
+        env_raw: Value of `DEEPAGENTS_ALLOWED_DIRS` (colon-separated), or
+            `None` if unset.
+
+    Returns:
+        List of resolved `Path` objects, or `None` if not configured.
+    """
+    if not env_raw:
+        return None
+    dirs = [Path(p.strip()).expanduser().resolve() for p in env_raw.split(":") if p.strip()]
+    return dirs or None
+
+
 @dataclass
 class Settings:
     """Global settings and environment detection for agent-tui.
@@ -413,6 +429,16 @@ class Settings:
     `[skills].extra_allowed_dirs` in `~/.agent-tui/config.toml`.
     """
 
+    deepagents_allowed_dirs: list[Path] | None = None
+    """Directories that DeepAgents can access for file operations.
+
+    When `None`, all paths are denied (safelist model). When set, only files
+    within these directories can be accessed by file tools
+    (`read_file`, `write_file`, `edit_file`, `glob`, `grep`).
+
+    Set via `DEEPAGENTS_ALLOWED_DIRS` env var (colon-separated).
+    """
+
     @classmethod
     def from_environment(cls, *, start_path: Path | None = None) -> Settings:
         """Create settings by detecting the current environment.
@@ -438,6 +464,7 @@ class Settings:
         google_cloud_project = _resolve("GOOGLE_CLOUD_PROJECT")
 
         from agent_tui.configurator.env_vars import (
+            DEEPAGENTS_ALLOWED_DIRS,
             EXTRA_SKILLS_DIRS,
             SHELL_ALLOW_LIST,
         )
@@ -461,6 +488,14 @@ class Settings:
             _read_config_toml_skills_dirs(),
         )
 
+        # Parse DeepAgents allowed directories from env var.
+        # Colon-separated list of paths that DeepAgents can access for file operations.
+        deepagents_allowed_dirs_raw = os.environ.get(DEEPAGENTS_ALLOWED_DIRS)
+        deepagents_allowed_dirs: list[Path] | None = None
+        if deepagents_allowed_dirs_raw:
+            dirs = [Path(p.strip()).expanduser().resolve() for p in deepagents_allowed_dirs_raw.split(":") if p.strip()]
+            deepagents_allowed_dirs = dirs or None
+
         return cls(
             openai_api_key=openai_key,
             anthropic_api_key=anthropic_key,
@@ -471,6 +506,7 @@ class Settings:
             project_root=project_root,
             shell_allow_list=shell_allow_list,
             extra_skills_dirs=extra_skills_dirs,
+            deepagents_allowed_dirs=deepagents_allowed_dirs,
         )
 
     def reload_from_environment(self, *, start_path: Path | None = None) -> list[str]:
@@ -518,6 +554,7 @@ class Settings:
             "project_root",
             "shell_allow_list",
             "extra_skills_dirs",
+            "deepagents_allowed_dirs",
         )
         """Fields refreshed on `/reload`.
 
@@ -529,6 +566,7 @@ class Settings:
         previous = {field: getattr(self, field) for field in reloadable_fields}
 
         from agent_tui.configurator.env_vars import (
+            DEEPAGENTS_ALLOWED_DIRS,
             EXTRA_SKILLS_DIRS,
             SHELL_ALLOW_LIST,
         )
@@ -566,6 +604,9 @@ class Settings:
             "extra_skills_dirs": _parse_extra_skills_dirs(
                 os.environ.get(EXTRA_SKILLS_DIRS),
                 _read_config_toml_skills_dirs(),
+            ),
+            "deepagents_allowed_dirs": _parse_deepagents_allowed_dirs(
+                os.environ.get(DEEPAGENTS_ALLOWED_DIRS),
             ),
         }
 
@@ -871,6 +912,22 @@ class Settings:
             List of extra skill directory paths, or empty list if not configured.
         """
         return self.extra_skills_dirs or []
+
+    def deepagents_file_tool_allowed(self, path: Path) -> bool:
+        """Check if a path is allowed for DeepAgents file tool operations.
+
+        Args:
+            path: The file path to check.
+
+        Returns:
+            `True` if the path is within an allowed directory or no
+            allowlist is configured, `False` if the path is outside all
+            allowed directories.
+        """
+        if self.deepagents_allowed_dirs is None:
+            return True
+        resolved = path.expanduser().resolve()
+        return any(resolved.is_relative_to(allowed) for allowed in self.deepagents_allowed_dirs)
 
 
 class SessionState:
