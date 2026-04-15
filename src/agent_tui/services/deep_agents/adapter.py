@@ -89,6 +89,7 @@ class DeepAgentsAdapter:
             import os
 
             from deepagents import create_deep_agent
+            from langchain.chat_models import init_chat_model
             from langgraph.checkpoint.memory import MemorySaver
 
             if self._api_key:
@@ -96,8 +97,12 @@ class DeepAgentsAdapter:
 
             checkpointer = MemorySaver()
 
+            # Disable Responses API to use Chat Completions API instead
+            # This accepts bare model names like "gpt-4o" without date suffixes
+            model = init_chat_model(self._model, use_responses_api=False)
+
             self._agent = create_deep_agent(
-                model=self._model,
+                model=model,
                 checkpointer=checkpointer,
             )
 
