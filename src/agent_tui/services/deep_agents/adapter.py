@@ -127,6 +127,10 @@ class DeepAgentsAdapter:
             from langgraph.checkpoint.memory import MemorySaver
 
             from agent_tui.services.deep_agents.backend import create_backend
+            from agent_tui.services.deep_agents.web_tools import (
+                create_fetch_url_tool,
+                create_web_search_tool,
+            )
 
             if self._api_key:
                 os.environ["OPENAI_API_KEY"] = self._api_key
@@ -144,10 +148,14 @@ class DeepAgentsAdapter:
             # Both are rooted at current working directory
             backend = create_backend()
 
+            # Web tools: web search via Tavily and URL fetching via httpx
+            tools = [create_web_search_tool(), create_fetch_url_tool()]
+
             self._agent = create_deep_agent(
                 model=model,
                 checkpointer=checkpointer,
                 backend=backend,
+                tools=tools,
             )
 
         return self._agent
