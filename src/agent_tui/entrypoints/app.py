@@ -4200,6 +4200,8 @@ class AgentTuiApp(App):
         # Cache for use by /tokens command and other consumers.
         self._last_token_count = token_count
         self._last_context_limit = context_limit
+        if self._status_bar and context_limit:
+            self._status_bar.set_context_limit(context_limit)
         # _on_tokens_update handles count display and caching.
         self._on_tokens_update(token_count)
 
