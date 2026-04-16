@@ -58,15 +58,18 @@ class DeepAgentsAdapter:
         model: str = "openai:gpt-5.2",
         *,
         api_key: str | None = None,
+        tavily_api_key: str | None = None,
     ) -> None:
         """Initialize the adapter.
 
         Args:
-            model: The model to use for DeepAgents. Defaults to "openai:o3".
-            api_key: Optional API key override.
+            model: The model to use for DeepAgents. Defaults to "openai:gpt-5.2".
+            api_key: Optional OpenAI API key override.
+            tavily_api_key: Optional Tavily API key override for web search.
         """
         self._model = model
         self._api_key = api_key
+        self._tavily_api_key = tavily_api_key
         self._agent: Any = None
         self._translator = EventTranslator()
         self._deepagents_available: bool
@@ -91,6 +94,7 @@ class DeepAgentsAdapter:
         return cls(
             model=settings.deepagents_model,
             api_key=settings.openai_api_key,
+            tavily_api_key=settings.tavily_api_key,
         )
 
     def _check_deepagents_available(self) -> bool:
@@ -134,6 +138,8 @@ class DeepAgentsAdapter:
 
             if self._api_key:
                 os.environ["OPENAI_API_KEY"] = self._api_key
+            if self._tavily_api_key:
+                os.environ["TAVILY_API_KEY"] = self._tavily_api_key
 
             checkpointer = MemorySaver()
 

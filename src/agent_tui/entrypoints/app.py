@@ -4154,27 +4154,17 @@ class AgentTuiApp(App):
             return False
         return result.get("type") == "approve"
 
-    def _format_tool_output(self, tool_name: str, output: str) -> str:
-        """Format tool output for display, with special handling for web tools."""
-        if tool_name == "web_search":
-            count = sum(1 for line in output.splitlines() if line and line[0].isdigit() and ". " in line)
-            return f"🔍 Found {count} result(s):\n{output}"
-        if tool_name == "fetch_url":
-            n = len(output.splitlines())
-            return f"📄 {n} lines of content:\n{output}"
-        return output
-
     def show_tool_result(self, tool_name: str, tool_output: str, tool_id: str) -> None:
         """Mount tool result widget.
 
         Called by AgentAdapter on TOOL_RESULT events. Mounts a ToolCallMessage
-        pre-populated with the success output.
+        pre-populated with the success output. The widget's built-in formatter
+        handles per-tool display (web_search, fetch_url, execute, etc.).
         """
-        formatted_output = self._format_tool_output(tool_name, tool_output)
         widget = ToolCallMessage(tool_name=tool_name, id=f"tool-{tool_id}")
         # Apply deferred state so the widget renders correctly on mount.
         widget._deferred_status = "success"
-        widget._deferred_output = formatted_output
+        widget._deferred_output = tool_output
 
         self.call_later(self._mount_message, widget)
 

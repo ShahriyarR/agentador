@@ -36,6 +36,8 @@ def create_web_search_tool():
             )
 
         try:
+            import json
+
             client = TavilyClient(api_key=api_key)
             response = client.search(query, max_results=5)
             results = response.get("results", [])
@@ -43,17 +45,19 @@ def create_web_search_tool():
             if not results:
                 return f"No results found for: {query}"
 
-            lines: list[str] = [f"Search results for: {query}\n"]
-            for i, result in enumerate(results, start=1):
-                title = result.get("title", "No title")
-                url = result.get("url", "")
-                content = result.get("content", "")
-                lines.append(f"{i}. {title}")
-                lines.append(f"   URL: {url}")
-                lines.append(f"   {content}")
-                lines.append("")
-
-            return "\n".join(lines).strip()
+            # Return JSON so the TUI widget can use its rich web-search formatter
+            payload = {
+                "query": query,
+                "results": [
+                    {
+                        "title": r.get("title", ""),
+                        "url": r.get("url", ""),
+                        "content": r.get("content", ""),
+                    }
+                    for r in results
+                ],
+            }
+            return json.dumps(payload)
         except Exception as e:
             return f"Search error: {str(e)}"
 
@@ -82,14 +86,16 @@ def create_fetch_url_tool():
             or an error message if the fetch fails.
         """
         try:
+            import json
+
             import httpx
             from markdownify import markdownify
 
             response = httpx.get(url, timeout=30, follow_redirects=True)
             response.raise_for_status()
-            html = response.text
-            markdown = markdownify(html)
-            return markdown[:10000]
+            markdown = markdownify(response.text)[:10000]
+            # Return JSON so the TUI widget can use its rich fetch-url formatter
+            return json.dumps({"url": url, "markdown_content": markdown})
         except httpx.HTTPStatusError as e:
             return f"Error fetching {url}: HTTP {e.response.status_code}"
         except Exception as e:
