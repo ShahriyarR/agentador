@@ -282,6 +282,13 @@ class TestSubagentEvents:
         assert len(results) == 1
         assert results[0].type != EventType.TOOL_RESULT
 
+    def test_on_tool_end_task_no_output_still_yields_subagent_end(self, translator: EventTranslator):
+        """task tool with missing output key still emits SUBAGENT_END (ordering fix)."""
+        event = {"event": "on_tool_end", "name": "task", "data": {}}
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type == EventType.SUBAGENT_END
+
     def test_on_tool_start_read_file_still_yields_tool_call(self, translator: EventTranslator):
         """Regression check: non-task tools still emit TOOL_CALL."""
         event = {

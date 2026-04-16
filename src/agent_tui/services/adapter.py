@@ -158,7 +158,7 @@ class AgentAdapter:
             case EventType.SUBAGENT_START:
                 name = event.subagent_name or "subagent"
                 self.app.set_status(f"Running subagent: {name}")
-                self.app.show_subagent_started(event.subagent_name)
+                self.app.show_subagent_started(name)
 
             case EventType.SUBAGENT_END:
                 self.app.set_status("thinking")

@@ -52,8 +52,8 @@ class EventTranslator:
         - on_tool_start where tool name is "task" → SUBAGENT_START
         - on_tool_end where tool name is "task" → SUBAGENT_END
 
-    Not yet handled (future phases):
-        - PLAN_STEP (Phase 5)
+    Not translated here (handled upstream or future phases):
+        - PLAN_STEP — not produced by LangGraph tool events; handled by adapter dispatch
         - CONTEXT_SUMMARIZED (Phase 6)
         - INTERRUPT (Phase 8)
     """
