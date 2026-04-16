@@ -188,13 +188,11 @@ class EventTranslator:
                     parsed = json.loads(str(tool_output))
                     if isinstance(parsed, dict):
                         # Common keys: tokens_remaining, token_count, remaining_tokens
-                        token_count = (
-                            parsed.get("tokens_remaining")
-                            or parsed.get("token_count")
-                            or parsed.get("remaining_tokens")
-                            or 0
-                        )
-                except (ValueError, json.JSONDecodeError):
+                        for key in ("tokens_remaining", "token_count", "remaining_tokens"):
+                            if key in parsed:
+                                token_count = int(parsed[key])
+                                break
+                except json.JSONDecodeError:
                     pass
             yield AgentEvent(type=EventType.CONTEXT_SUMMARIZED, token_count=token_count)
             return
