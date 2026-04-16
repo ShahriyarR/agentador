@@ -163,18 +163,18 @@ class EventTranslator:
 
     def _handle_tool_end(self, data: dict[str, Any], event: dict[str, Any]) -> Iterator[AgentEvent]:
         """Handle on_tool_end events for tool results."""
-        if "output" not in data:
-            return
-        tool_output = data.get("output")
-        if tool_output is None:
-            return
-
-        # Get tool name and run_id from event (similar to _handle_tool_start)
+        # Get tool name early so task tool check can run regardless of output presence
         tool_name = event.get("name", "") or data.get("name", "")
         run_id = event.get("run_id", "")
 
         if tool_name == "task":
             yield AgentEvent(type=EventType.SUBAGENT_END, subagent_name="")
+            return
+
+        if "output" not in data:
+            return
+        tool_output = data.get("output")
+        if tool_output is None:
             return
 
         yield AgentEvent(
