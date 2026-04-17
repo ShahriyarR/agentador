@@ -2524,9 +2524,9 @@ class AgentTuiApp(App):
                     lines.append(f"  {name} \u2014 {description}" if description else f"  {name}")
                 await self._mount_message(AppMessage("\n".join(lines)))
             else:
-                await self._mount_message(AppMessage(
-                    "No skills available. Create .deepagents/skills/ directory and add .md files."
-                ))
+                await self._mount_message(
+                    AppMessage("No skills available. Create .deepagents/skills/ directory and add .md files.")
+                )
         elif cmd == "/memory":
             await self._mount_message(UserMessage(command))
             try:
@@ -2534,9 +2534,7 @@ class AgentTuiApp(App):
 
                 summary = get_memory_summary()
             except Exception:
-                await self._mount_message(
-                    ErrorMessage("Memory not available (DeepAgents not configured).")
-                )
+                await self._mount_message(ErrorMessage("Memory not available (DeepAgents not configured)."))
                 return
             await self._mount_message(AppMessage(summary))
         elif cmd == "/reload":
@@ -4282,6 +4280,75 @@ class AgentTuiApp(App):
         Phase 8+ will implement proper interrupt handling. For now, just log.
         """
         logger.debug("Agent paused for human input")
+
+    async def show_interrupt_overlay(
+        self,
+        tool_name: str,
+        tool_args: dict[str, Any],
+        tool_id: str,
+    ) -> dict[str, Any]:
+        """Show interrupt overlay and return user decision.
+
+        Displays a modal overlay for interrupt-based tool execution approval.
+        Supports approve/reject actions with keyboard shortcuts.
+        Edit mode is currently a stub that shows "not implemented" and falls
+        through to approve.
+
+        Called by AgentAdapter on INTERRUPT events when the agent needs
+        user approval before proceeding with a tool call.
+
+        Args:
+            tool_name: The name of the tool being requested (e.g., "execute", "fetch_url")
+            tool_args: Dictionary of arguments for the tool call
+            tool_id: Unique identifier for this tool call
+
+        Returns:
+            dict with keys:
+            - action: "approve" | "edit" | "reject"
+            - edited_args: dict (only if action="edit", currently always empty)
+
+        Example:
+            >>> result = await app.show_interrupt_overlay(
+            ...     tool_name="execute",
+            ...     tool_args={"command": "ls -la"},
+            ...     tool_id="call_123",
+            ... )
+            >>> # User presses 'y' to approve
+            >>> assert result == {"action": "approve"}
+        """
+        from agent_tui.entrypoints.widgets.interrupt import InterruptOverlay
+
+        loop = asyncio.get_running_loop()
+        result_future: asyncio.Future[dict[str, Any]] = loop.create_future()
+
+        # Create overlay with unique ID to avoid conflicts
+        unique_id = f"interrupt-overlay-{uuid.uuid4().hex[:8]}"
+        overlay = InterruptOverlay(
+            tool_name=tool_name,
+            tool_args=tool_args,
+            tool_id=tool_id,
+            id=unique_id,
+        )
+        overlay.set_future(result_future)
+
+        # Mount the overlay as a modal screen
+        self.push_screen(overlay)
+
+        # Wait for user decision
+        try:
+            result = await result_future
+            logger.info("[APP] Interrupt overlay result: %s", result)
+        except Exception:
+            logger.exception("Error waiting for interrupt overlay result")
+            return {"action": "reject"}
+        finally:
+            # Ensure screen is popped even if there's an error
+            try:
+                self.pop_screen()
+            except Exception:
+                pass  # Screen may already be popped
+
+        return result
 
 
 @dataclass(frozen=True)
