@@ -339,6 +339,9 @@ class StatusBar(Horizontal):
     the model reported final usage.)
     """
 
+    _context_limit: int = 0
+    """Context window size in tokens, or 0 if unknown."""
+
     def watch_tokens(self, new_value: int) -> None:
         """Update token display when count changes."""
         self._render_tokens(new_value, approximate=self._approximate)
@@ -358,11 +361,15 @@ class StatusBar(Horizontal):
 
         if count > 0:
             suffix = "+" if approximate else ""
-            # Format with K suffix for thousands
-            if count >= 1000:  # noqa: PLR2004  # Count formatting threshold
-                display.update(f"{count / 1000:.1f}K{suffix} tokens")
+            if count >= 1000:  # noqa: PLR2004
+                formatted = f"{count / 1000:.1f}K{suffix}"
             else:
-                display.update(f"{count}{suffix} tokens")
+                formatted = f"{count}{suffix}"
+            if self._context_limit > 0:
+                pct = int(count * 100 / self._context_limit)
+                display.update(f"{formatted} ({pct}%) tokens")
+            else:
+                display.update(f"{formatted} tokens")
         else:
             display.update("")
 
@@ -392,6 +399,15 @@ class StatusBar(Horizontal):
             self.query_one("#tokens-display", Static).update("")
         except NoMatches:
             return
+
+    def set_context_limit(self, limit: int) -> None:
+        """Set the context window size for percentage display.
+
+        Args:
+            limit: Context window token limit, or 0 to disable percentage display.
+        """
+        self._context_limit = limit
+        self._render_tokens(self.tokens, approximate=self._approximate)
 
     def set_model(self, *, provider: str, model: str) -> None:
         """Update the model display text.

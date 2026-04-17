@@ -303,3 +303,133 @@ class TestSubagentEvents:
         assert len(results) == 1
         assert results[0].type == EventType.TOOL_CALL
         assert results[0].tool_name == "read_file"
+
+
+class TestCompactConversationEvents:
+    def test_on_tool_start_compact_conversation_yields_status_update(self, translator: EventTranslator):
+        """compact_conversation tool start yields STATUS_UPDATE with status text."""
+        event = {
+            "event": "on_tool_start",
+            "name": "compact_conversation",
+            "data": {
+                "input": {},
+            },
+            "run_id": "run_compact_1",
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type == EventType.STATUS_UPDATE
+        assert results[0].status_text == "Compacting context..."
+
+    def test_on_tool_start_compact_conversation_not_tool_call(self, translator: EventTranslator):
+        """compact_conversation tool should not emit TOOL_CALL."""
+        event = {
+            "event": "on_tool_start",
+            "name": "compact_conversation",
+            "data": {
+                "input": {},
+            },
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type != EventType.TOOL_CALL
+
+    def test_on_tool_end_compact_conversation_json_output_yields_context_summarized(
+        self, translator: EventTranslator
+    ):
+        """compact_conversation tool end with JSON output yields CONTEXT_SUMMARIZED."""
+        event = {
+            "event": "on_tool_end",
+            "name": "compact_conversation",
+            "data": {
+                "output": '{"tokens_remaining": 4500}',
+            },
+            "run_id": "run_compact_1",
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type == EventType.CONTEXT_SUMMARIZED
+        assert results[0].token_count == 4500
+
+    def test_on_tool_end_compact_conversation_tokens_remaining_zero_uses_zero(self, translator: EventTranslator):
+        """compact_conversation tokens_remaining=0 yields token_count=0, not falling through to other keys."""
+        event = {
+            "event": "on_tool_end",
+            "name": "compact_conversation",
+            "data": {
+                "output": '{"tokens_remaining": 0, "token_count": 9999}',
+            },
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type == EventType.CONTEXT_SUMMARIZED
+        assert results[0].token_count == 0
+
+    def test_on_tool_end_compact_conversation_json_token_count_key(self, translator: EventTranslator):
+        """compact_conversation tries token_count key if tokens_remaining absent."""
+        event = {
+            "event": "on_tool_end",
+            "name": "compact_conversation",
+            "data": {
+                "output": '{"token_count": 3000}',
+            },
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type == EventType.CONTEXT_SUMMARIZED
+        assert results[0].token_count == 3000
+
+    def test_on_tool_end_compact_conversation_json_remaining_tokens_key(self, translator: EventTranslator):
+        """compact_conversation tries remaining_tokens key if other keys absent."""
+        event = {
+            "event": "on_tool_end",
+            "name": "compact_conversation",
+            "data": {
+                "output": '{"remaining_tokens": 2500}',
+            },
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type == EventType.CONTEXT_SUMMARIZED
+        assert results[0].token_count == 2500
+
+    def test_on_tool_end_compact_conversation_no_output_yields_context_summarized_zero(
+        self, translator: EventTranslator
+    ):
+        """compact_conversation tool end with no output yields CONTEXT_SUMMARIZED with token_count=0."""
+        event = {
+            "event": "on_tool_end",
+            "name": "compact_conversation",
+            "data": {},
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type == EventType.CONTEXT_SUMMARIZED
+        assert results[0].token_count == 0
+
+    def test_on_tool_end_compact_conversation_plain_text_output(self, translator: EventTranslator):
+        """compact_conversation tool end with plain text output yields CONTEXT_SUMMARIZED with token_count=0."""
+        event = {
+            "event": "on_tool_end",
+            "name": "compact_conversation",
+            "data": {
+                "output": "Context compacted successfully",
+            },
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type == EventType.CONTEXT_SUMMARIZED
+        assert results[0].token_count == 0
+
+    def test_on_tool_end_compact_conversation_not_tool_result(self, translator: EventTranslator):
+        """compact_conversation tool should not emit TOOL_RESULT."""
+        event = {
+            "event": "on_tool_end",
+            "name": "compact_conversation",
+            "data": {
+                "output": "some output",
+            },
+        }
+        results = list(translator.translate(event))
+        assert len(results) == 1
+        assert results[0].type != EventType.TOOL_RESULT

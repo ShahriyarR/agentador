@@ -45,6 +45,8 @@ class SessionStats:
             `model_name`. Empty dict means no named-model requests were
             recorded; `print_usage_table` omits the model table in that case and
             shows only the wall-time line (if applicable).
+        context_limit: The model's context window size in tokens, or 0 if unknown.
+        context_compaction_count: Number of times context was compacted this session.
     """
 
     request_count: int = 0
@@ -52,6 +54,8 @@ class SessionStats:
     output_tokens: int = 0
     wall_time_seconds: float = 0.0
     per_model: dict[str, ModelStats] = field(default_factory=dict)
+    context_limit: int = 0
+    context_compaction_count: int = 0
 
     def record_request(
         self,
@@ -91,6 +95,9 @@ class SessionStats:
         self.input_tokens += other.input_tokens
         self.output_tokens += other.output_tokens
         self.wall_time_seconds += other.wall_time_seconds
+        self.context_compaction_count += other.context_compaction_count
+        if other.context_limit:
+            self.context_limit = other.context_limit
         for model, ms in other.per_model.items():
             entry = self.per_model.setdefault(model, ModelStats())
             entry.request_count += ms.request_count

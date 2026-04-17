@@ -52,9 +52,12 @@ class EventTranslator:
         - on_tool_start where tool name is "task" → SUBAGENT_START
         - on_tool_end where tool name is "task" → SUBAGENT_END
 
+    Supported events (Phase 6):
+        - on_tool_start where tool name is "compact_conversation" → STATUS_UPDATE
+        - on_tool_end where tool name is "compact_conversation" → CONTEXT_SUMMARIZED
+
     Not translated here (handled upstream or future phases):
         - PLAN_STEP — not produced by LangGraph tool events; handled by adapter dispatch
-        - CONTEXT_SUMMARIZED (Phase 6)
         - INTERRUPT (Phase 8)
     """
 
@@ -127,6 +130,10 @@ class EventTranslator:
         tool_input = data.get("input", {})
         run_id = event.get("run_id", "")
 
+        if tool_name == "compact_conversation":
+            yield AgentEvent(type=EventType.STATUS_UPDATE, status_text="Compacting context...")
+            return
+
         if tool_name == "task":
             subagent_name = (
                 tool_input.get("description", "")
@@ -169,6 +176,25 @@ class EventTranslator:
 
         if tool_name == "task":
             yield AgentEvent(type=EventType.SUBAGENT_END, subagent_name="")
+            return
+
+        if tool_name == "compact_conversation":
+            # Try to extract token count from output (may be JSON or plain text)
+            token_count = 0
+            tool_output = data.get("output", "")
+            if tool_output:
+                import json
+                try:
+                    parsed = json.loads(str(tool_output))
+                    if isinstance(parsed, dict):
+                        # Common keys: tokens_remaining, token_count, remaining_tokens
+                        for key in ("tokens_remaining", "token_count", "remaining_tokens"):
+                            if key in parsed:
+                                token_count = int(parsed[key])
+                                break
+                except json.JSONDecodeError:
+                    pass
+            yield AgentEvent(type=EventType.CONTEXT_SUMMARIZED, token_count=token_count)
             return
 
         if "output" not in data:

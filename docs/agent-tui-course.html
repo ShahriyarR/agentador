@@ -740,6 +740,9 @@
       <button class="nav-dot" data-target="module-4" aria-label="Module 4"></button>
       <button class="nav-dot" data-target="module-5" aria-label="Module 5"></button>
       <button class="nav-dot" data-target="module-6" aria-label="Module 6"></button>
+      <button class="nav-dot" data-target="module-7" aria-label="Module 7"></button>
+      <button class="nav-dot" data-target="module-8" aria-label="Module 8"></button>
+      <button class="nav-dot" data-target="module-9" aria-label="Module 9"></button>
     </div>
   </div>
 </nav>
@@ -1543,10 +1546,435 @@ $((1+1))
 
     <div class="screen animate-in">
       <div class="callout callout-accent">
+        <div class="callout-icon">🏁</div>
+        <div class="callout-content">
+          <strong class="callout-title">Core architecture: complete!</strong>
+          <p>You now understand how agent-tui works at its foundation. The protocol pattern, event-driven dispatch, and defense-in-depth safety all combine to make a system that's both flexible and safe. Three more modules ahead — where the agent gets web access, learns to delegate to subagents, and manages its own memory.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 7: Web Search ==================== -->
+<section class="module" id="module-7">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">07</span>
+      <h1 class="module-title">Giving the Agent Eyes</h1>
+      <p class="module-subtitle">Web search and URL fetching — Phase 4</p>
+    </header>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Two new tools enter the arena</h2>
+      <p style="margin-bottom: var(--space-6);">Phase 4 adds two <span class="term" data-definition="A LangChain tool is a function the agent can decide to call. It has a name, description, and arguments schema.">LangChain tools</span> to the agent's toolkit:</p>
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in" style="--stagger-index: 0; border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🔍</div>
+          <h4 class="pattern-title">web_search</h4>
+          <p class="pattern-desc">Calls the <strong>Tavily API</strong> with a query string. Returns a JSON list of results — each with title, URL, and a content snippet.</p>
+        </div>
+        <div class="pattern-card animate-in" style="--stagger-index: 1; border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🌐</div>
+          <h4 class="pattern-title">fetch_url</h4>
+          <p class="pattern-desc">Downloads a URL with <strong>httpx</strong>, converts the HTML to Markdown via <em>markdownify</em>, and truncates to 10,000 chars — so the agent can read web pages as text.</p>
+        </div>
+      </div>
+      <div class="callout callout-info" style="margin-top: var(--space-6)">
+        <div class="callout-icon">🔑</div>
+        <div class="callout-content">
+          <strong class="callout-title">Lazy credential injection</strong>
+          <p>Both tools read their API keys lazily — <code style="font-family: var(--font-mono); font-size: var(--text-sm)">TAVILY_API_KEY</code> is written into <code style="font-family: var(--font-mono); font-size: var(--text-sm)">os.environ</code> only when the agent first runs, not at import time. This means you can configure the TUI without importing the tools.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Why return JSON, not plain text?</h2>
+      <p style="margin-bottom: var(--space-6);">Both tools return a <strong>JSON string</strong> — not a human-readable sentence. This is intentional.</p>
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in" style="--stagger-index: 0">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Agent sees structured data</strong>
+            <p>The LLM can parse JSON and extract specific fields — title, URL, content — rather than guessing from prose.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 1">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>TUI widget recognises the format</strong>
+            <p><code style="font-family: var(--font-mono); font-size: var(--text-sm)">ToolCallMessage._format_web_output()</code> detects JSON with a <code style="font-family: var(--font-mono); font-size: var(--text-sm)">results</code> key and renders each result with a bold title and a dim URL — much richer than raw text.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 2">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>No double-formatting</strong>
+            <p>The widget is the single source of truth for display logic. The tool just provides the data; the widget decides how to show it. A single responsibility each.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The web search flow</h2>
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in" style="--stagger-index: 0">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Agent emits <code style="font-family: var(--font-mono); font-size: var(--text-sm)">on_tool_start</code> with <code style="font-family: var(--font-mono); font-size: var(--text-sm)">name="web_search"</code></strong>
+            <p>EventTranslator sees a normal tool name (not "task" or "compact_conversation"), so it yields a <code style="font-family: var(--font-mono); font-size: var(--text-sm)">TOOL_CALL</code> event.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 1">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Adapter dispatches → approval widget</strong>
+            <p>The TUI shows the tool name and arguments. You decide: approve or deny.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 2">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Approved → Tavily executes → <code style="font-family: var(--font-mono); font-size: var(--text-sm)">on_tool_end</code></strong>
+            <p>Results come back as JSON. EventTranslator yields <code style="font-family: var(--font-mono); font-size: var(--text-sm)">TOOL_RESULT</code>. The widget formats and displays them.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Quiz: Web tools</h2>
+      <div class="quiz-container" id="quiz-7">
+        <div class="quiz-question-block" data-question="q1" data-correct="option-b">
+          <h3 class="quiz-question">Why do <code style="font-family: var(--font-mono)">web_search</code> and <code style="font-family: var(--font-mono)">fetch_url</code> return JSON instead of a plain sentence like "Here are the results"?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>JSON is required by the Tavily API format</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Both the LLM and the TUI widget can parse structured data reliably, while prose is ambiguous</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>JSON uses less tokens in the context window</span>
+            </button>
+          </div>
+          <div class="quiz-feedback" id="q1-feedback"></div>
+        </div>
+        <div class="quiz-question-block" data-question="q2" data-correct="option-c">
+          <h3 class="quiz-question">When the agent calls <code style="font-family: var(--font-mono)">web_search</code>, what happens first in the TUI?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Tavily is called immediately with the query</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>The results are displayed in a formatted widget</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>An approval widget appears asking the user to allow or deny the search</span>
+            </button>
+          </div>
+          <div class="quiz-feedback" id="q2-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-7')">Check Answers</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-7')">Try Again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 8: Planning & Subagents ==================== -->
+<section class="module" id="module-8">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">08</span>
+      <h1 class="module-title">Agents Talking to Agents</h1>
+      <p class="module-subtitle">Subagent spawning and planning events — Phase 5</p>
+    </header>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The "task" tool is special</h2>
+      <p style="margin-bottom: var(--space-6);">When a DeepAgents agent needs to delegate work, it calls a tool named <code style="font-family: var(--font-mono); font-size: var(--text-sm)">task</code>. The TUI intercepts this before it ever reaches the approval widget.</p>
+      <div class="callout callout-accent">
+        <div class="callout-icon">🧠</div>
+        <div class="callout-content">
+          <strong class="callout-title">The interception pattern</strong>
+          <p>In <code style="font-family: var(--font-mono); font-size: var(--text-sm)">EventTranslator._handle_tool_start()</code>, the tool name is checked <em>before</em> the generic TOOL_CALL path. If the name is <code style="font-family: var(--font-mono); font-size: var(--text-sm)">"task"</code>, it yields <code style="font-family: var(--font-mono); font-size: var(--text-sm)">SUBAGENT_START</code> and returns early. The approval flow never fires.</p>
+        </div>
+      </div>
+      <div class="pattern-cards stagger-children" style="margin-top: var(--space-6)">
+        <div class="pattern-card animate-in" style="--stagger-index: 0; border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">📋</div>
+          <h4 class="pattern-title">PLAN_STEP</h4>
+          <p class="pattern-desc">Agent is decomposing a task. Shows <strong>⚙ Planning N/M</strong> with the step text below it in the chat view.</p>
+        </div>
+        <div class="pattern-card animate-in" style="--stagger-index: 1; border-top: 3px solid var(--color-actor-5)">
+          <div class="pattern-icon" style="background: var(--color-actor-5)">→</div>
+          <h4 class="pattern-title">SUBAGENT_START</h4>
+          <p class="pattern-desc">A subagent was spawned. Shows <strong>→ Subagent: &lt;name&gt;</strong> in the chat. Name comes from the <code style="font-family: var(--font-mono); font-size: var(--text-sm)">description</code> field, truncated to 80 chars.</p>
+        </div>
+        <div class="pattern-card animate-in" style="--stagger-index: 2; border-top: 3px solid var(--color-success)">
+          <div class="pattern-icon" style="background: var(--color-success)">✓</div>
+          <h4 class="pattern-title">SUBAGENT_END</h4>
+          <p class="pattern-desc">Subagent finished. Shows <strong>✓ Subagent done: &lt;name&gt;</strong>. Emitted on <code style="font-family: var(--font-mono); font-size: var(--text-sm)">on_tool_end</code> with <code style="font-family: var(--font-mono); font-size: var(--text-sm)">name="task"</code>, even when there's no output key.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Order matters: check the tool name first</h2>
+      <p style="margin-bottom: var(--space-6);">A subtle bug was caught during implementation. Here's why the tool name check must happen <em>before</em> the output-presence guard:</p>
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in" style="--stagger-index: 0">
+          <div class="step-num" style="background: var(--color-error)">✗</div>
+          <div class="step-body">
+            <strong>Wrong order (original)</strong>
+            <p>Check if <code style="font-family: var(--font-mono); font-size: var(--text-sm)">"output" in data</code> → if missing, return early. <em>Then</em> check tool name. Result: if a task tool ends with no output key, SUBAGENT_END is silently dropped.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 1">
+          <div class="step-num" style="background: var(--color-success)">✓</div>
+          <div class="step-body">
+            <strong>Right order (fixed)</strong>
+            <p>Extract tool name first. If it's <code style="font-family: var(--font-mono); font-size: var(--text-sm)">"task"</code>, yield SUBAGENT_END and return — <em>regardless</em> of whether output is present. The output-presence guard only applies to regular tools.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout callout-info" style="margin-top: var(--space-4)">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">The lesson</strong>
+          <p>When you have special cases that bypass generic logic, the special case check must come first. Early-return patterns are powerful — but only when the conditions are evaluated in the right order.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The subagent lifecycle in the TUI</h2>
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in" style="--stagger-index: 0">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Agent emits <code style="font-family: var(--font-mono); font-size: var(--text-sm)">on_tool_start</code>, <code style="font-family: var(--font-mono); font-size: var(--text-sm)">name="task"</code></strong>
+            <p>EventTranslator extracts the description (or task, or "subagent" as fallback), truncates to 80 chars, yields SUBAGENT_START.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 1">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Adapter dispatches → <code style="font-family: var(--font-mono); font-size: var(--text-sm)">app.show_subagent_started(name)</code></strong>
+            <p>Status bar shows "Running subagent: &lt;name&gt;". Chat shows "→ Subagent: &lt;name&gt;" as an inline message.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 2">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Subagent completes → <code style="font-family: var(--font-mono); font-size: var(--text-sm)">on_tool_end</code>, <code style="font-family: var(--font-mono); font-size: var(--text-sm)">name="task"</code></strong>
+            <p>EventTranslator yields SUBAGENT_END. Adapter calls <code style="font-family: var(--font-mono); font-size: var(--text-sm)">show_subagent_finished</code>. Status bar resets to "thinking". Chat shows "✓ Subagent done".</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Quiz: Subagents</h2>
+      <div class="quiz-container" id="quiz-8">
+        <div class="quiz-question-block" data-question="q1" data-correct="option-b">
+          <h3 class="quiz-question">When a DeepAgents agent spawns a subagent by calling the <code style="font-family: var(--font-mono)">task</code> tool, does the TUI show the normal approval widget?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Yes — all tool calls go through approval</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>No — the task tool is intercepted before reaching the approval flow and emits SUBAGENT_START instead</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Only if the subagent uses dangerous tools</span>
+            </button>
+          </div>
+          <div class="quiz-feedback" id="q1-feedback-8"></div>
+        </div>
+        <div class="quiz-question-block" data-question="q2" data-correct="option-a">
+          <h3 class="quiz-question">What happens if the <code style="font-family: var(--font-mono)">on_tool_end</code> event for a <code style="font-family: var(--font-mono)">task</code> tool has no <code style="font-family: var(--font-mono)">output</code> key in its data?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SUBAGENT_END is still emitted — the tool name check runs before the output-presence guard</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>The event is silently dropped</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>An error event is emitted instead</span>
+            </button>
+          </div>
+          <div class="quiz-feedback" id="q2-feedback-8"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-8')">Check Answers</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-8')">Try Again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 9: Context Management ==================== -->
+<section class="module" id="module-9">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">09</span>
+      <h1 class="module-title">Never Lose the Thread</h1>
+      <p class="module-subtitle">Context compaction, token counting, and memory management — Phase 6</p>
+    </header>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The context window problem</h2>
+      <p style="margin-bottom: var(--space-6);">Every LLM has a fixed context window. Long conversations fill it up. DeepAgents handles this automatically by calling a special tool — <code style="font-family: var(--font-mono); font-size: var(--text-sm)">compact_conversation</code> — to summarise old history. Phase 6 makes this visible in the TUI.</p>
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in" style="--stagger-index: 0; border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">⏳</div>
+          <h4 class="pattern-title">STATUS_UPDATE</h4>
+          <p class="pattern-desc">Emitted when <code style="font-family: var(--font-mono); font-size: var(--text-sm)">compact_conversation</code> starts. Shows "Compacting context…" in the status bar so the user knows to wait.</p>
+        </div>
+        <div class="pattern-card animate-in" style="--stagger-index: 1; border-top: 3px solid var(--color-success)">
+          <div class="pattern-icon" style="background: var(--color-success)">✓</div>
+          <h4 class="pattern-title">CONTEXT_SUMMARIZED</h4>
+          <p class="pattern-desc">Emitted when compaction ends. Carries the remaining token count parsed from the tool's JSON output. Mounts a <code style="font-family: var(--font-mono); font-size: var(--text-sm)">SummarizationMessage</code> in the chat and updates the status bar.</p>
+        </div>
+      </div>
+      <div class="callout callout-info" style="margin-top: var(--space-6)">
+        <div class="callout-icon">🔍</div>
+        <div class="callout-content">
+          <strong class="callout-title">Same interception pattern as subagents</strong>
+          <p>Just like the <code style="font-family: var(--font-mono); font-size: var(--text-sm)">task</code> tool bypasses the approval flow, <code style="font-family: var(--font-mono); font-size: var(--text-sm)">compact_conversation</code> is intercepted before reaching TOOL_CALL. The check runs before the <code style="font-family: var(--font-mono); font-size: var(--text-sm)">task</code> check, which runs before the generic path.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Parsing the token count safely</h2>
+      <p style="margin-bottom: var(--space-6);">The compaction tool returns JSON, but the token count key isn't standardised. Three possible keys are tried in priority order:</p>
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in" style="--stagger-index: 0">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong><code style="font-family: var(--font-mono); font-size: var(--text-sm)">tokens_remaining</code> — checked first</strong>
+            <p>The primary key. If present, its value is used — even if it's 0.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 1">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong><code style="font-family: var(--font-mono); font-size: var(--text-sm)">token_count</code> — fallback</strong>
+            <p>Tried only if <code style="font-family: var(--font-mono); font-size: var(--text-sm)">tokens_remaining</code> is absent from the dict.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in" style="--stagger-index: 2">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong><code style="font-family: var(--font-mono); font-size: var(--text-sm)">remaining_tokens</code> — last resort</strong>
+            <p>If none of the keys are present, <code style="font-family: var(--font-mono); font-size: var(--text-sm)">token_count</code> defaults to 0. Non-JSON output also yields 0.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout callout-accent" style="margin-top: var(--space-4)">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <strong class="callout-title">Key presence, not truthiness</strong>
+          <p>The lookup uses a <code style="font-family: var(--font-mono); font-size: var(--text-sm)">for key in (...): if key in parsed: break</code> loop — not Python's <code style="font-family: var(--font-mono); font-size: var(--text-sm)">or</code> chaining. This ensures a value of <code style="font-family: var(--font-mono); font-size: var(--text-sm)">0</code> on the first key doesn't fall through to the second key (since <code style="font-family: var(--font-mono); font-size: var(--text-sm)">0 or ...</code> would be truthy-false and continue the chain).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Token percentage in the status bar</h2>
+      <p style="margin-bottom: var(--space-6);">Once the context limit is known, the status bar shows both the absolute count <em>and</em> the percentage used:</p>
+      <div class="icon-rows">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-text-secondary); font-family: var(--font-mono); font-size: var(--text-sm); color: white">12K</div>
+          <div>
+            <strong>Without context limit</strong>
+            <p>Shows <code style="font-family: var(--font-mono); font-size: var(--text-sm)">12.3K tokens</code> — just the count.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-3); font-family: var(--font-mono); font-size: var(--text-sm); color: white">45%</div>
+          <div>
+            <strong>With context limit known</strong>
+            <p>Shows <code style="font-family: var(--font-mono); font-size: var(--text-sm)">12.3K (45%) tokens</code> — percentage helps you judge how close to the limit you are before compaction triggers.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent)">📊</div>
+          <div>
+            <strong>Stored in SessionStats</strong>
+            <p><code style="font-family: var(--font-mono); font-size: var(--text-sm)">context_limit</code> and <code style="font-family: var(--font-mono); font-size: var(--text-sm)">context_compaction_count</code> are tracked across turns so you can see the full session history.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Quiz: Context management</h2>
+      <div class="quiz-container" id="quiz-9">
+        <div class="quiz-question-block" data-question="q1" data-correct="option-c">
+          <h3 class="quiz-question">The <code style="font-family: var(--font-mono)">compact_conversation</code> tool's output JSON contains <code style="font-family: var(--font-mono)">{"tokens_remaining": 0, "token_count": 9999}</code>. What token count does the TUI use?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>9999 — because 0 is falsy so the code falls through</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>9999 — token_count takes priority over tokens_remaining</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>0 — tokens_remaining is present in the dict so its value is used, even though it's 0</span>
+            </button>
+          </div>
+          <div class="quiz-feedback" id="q1-feedback-9"></div>
+        </div>
+        <div class="quiz-question-block" data-question="q2" data-correct="option-b">
+          <h3 class="quiz-question">When does the TUI show a percentage next to the token count (e.g. "12.3K (45%) tokens")?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Always — the percentage is always computed</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Only when a context limit has been set via <code style="font-family: var(--font-mono)">set_context_limit()</code></span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Only after context has been compacted at least once</span>
+            </button>
+          </div>
+          <div class="quiz-feedback" id="q2-feedback-9"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-9')">Check Answers</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-9')">Try Again</button>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <div class="callout callout-accent">
         <div class="callout-icon">🎓</div>
         <div class="callout-content">
-          <strong class="callout-title">You made it!</strong>
-          <p>You now understand how agent-tui works. The key takeaway: the protocol pattern lets you build flexible systems where components can be swapped. The approval system adds safety without adding complexity to the agent code. And defense in depth — checking dangerous patterns before showing the widget — makes the system safer without annoying the user.</p>
+          <strong class="callout-title">You've completed the full course!</strong>
+          <p>From the approval system to web search, subagent delegation, and context management — you now understand how agent-tui extends a basic TUI into a full agent interface. The patterns repeat: intercept special tool names early, emit semantic events, keep the UI layer thin. Build on these three rules and you can add any capability.</p>
         </div>
       </div>
     </div>
