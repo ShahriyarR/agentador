@@ -56,10 +56,6 @@ def create_backend(
 
 
 def create_store():
-    """Create an in-memory store for cross-thread state persistence.
-
-    Returns:
-        InMemoryStore instance for sharing state across conversation threads.
-    """
+    """Create an in-memory store for cross-thread state persistence."""
     from langgraph.store.memory import InMemoryStore
     return InMemoryStore()

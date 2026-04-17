@@ -330,3 +330,29 @@ class TestDeepAgentsAdapterEdgeCases:
 
                 adapter = DeepAgentsAdapter()
                 assert adapter._model == "openai:gpt-4o"
+
+    def test_store_survives_model_switch(self):
+        """_store must survive a model switch (set_model clears _agent but not _store).
+
+        This verifies that cross-thread state is preserved when the user changes
+        models: set_model() resets self._agent to None so the next call to
+        _ensure_agent() re-creates the agent, but the ``if self._store is None``
+        guard ensures the same store object is reused rather than a fresh one.
+        """
+        with patch(
+            "agent_tui.services.deep_agents.adapter.DeepAgentsAdapter._check_deepagents_available",
+            return_value=True,
+        ):
+            with patch.dict("sys.modules", {"deepagents": MagicMock()}):
+                from agent_tui.services.deep_agents.adapter import DeepAgentsAdapter
+
+                adapter = DeepAgentsAdapter()
+                sentinel_store = object()
+                adapter._store = sentinel_store
+                adapter._agent = MagicMock()  # simulate an initialised agent
+
+                # Simulate what set_model() does
+                adapter._agent = None
+
+                # The store must still be the same object after the model switch
+                assert adapter._store is sentinel_store

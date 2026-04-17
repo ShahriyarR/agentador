@@ -168,6 +168,7 @@ class DeepAgentsAdapter:
             skill_sources = get_skill_sources()
             skill_kwargs = {"skills": skill_sources} if skill_sources else {}
 
+            # Reuse existing store across model switches to preserve cross-thread state.
             if self._store is None:
                 self._store = create_store()
 
