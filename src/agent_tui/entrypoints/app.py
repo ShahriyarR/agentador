@@ -2323,7 +2323,7 @@ class AgentTuiApp(App):
                 "Commands: /quit, /clear, /offload, /editor, /mcp, "
                 "/model [--model-params JSON] [--default], /notifications, "
                 "/reload, /skill:<name>, /remember, /skill-creator, /theme, "
-                "/tokens, /threads, /trace, "
+                "/tokens, /threads, /trace, /skills, /memory, "
                 "/update, /auto-update, /changelog, /docs, /feedback, /help\n\n"
                 "Interactive Features:\n"
                 "  Enter           Submit your message\n"
@@ -2513,6 +2513,43 @@ class AgentTuiApp(App):
                 await self._switch_model(model_arg, extra_kwargs=extra_kwargs)
             else:
                 await self._show_model_selector(extra_kwargs=extra_kwargs)
+        elif cmd == "/skills":
+            await self._mount_message(UserMessage(command))
+            skills: list[dict[str, Any]] = []
+            try:
+                if self._agent is not None and hasattr(self._agent, "get_skills"):
+                    skills = await self._agent.get_skills()
+            except Exception:
+                await self._mount_message(AppMessage("Failed to load skills."))
+                return
+            if skills:
+                lines = [f"Available skills ({len(skills)}):"]
+                for skill in skills:
+                    name = skill.get("name", "")
+                    description = skill.get("description", "")
+                    if description:
+                        lines.append(f"  {name} \u2014 {description}")
+                    else:
+                        lines.append(f"  {name}")
+                await self._mount_message(AppMessage("\n".join(lines)))
+            else:
+                await self._mount_message(
+                    AppMessage(
+                        "No skills available. Create .deepagents/skills/ directory and add .md files."
+                    )
+                )
+        elif cmd == "/memory":
+            await self._mount_message(UserMessage(command))
+            try:
+                from agent_tui.services.deep_agents.memory import get_memory_summary
+
+                summary = get_memory_summary()
+            except Exception:
+                await self._mount_message(
+                    AppMessage("Memory not available (DeepAgents not configured).")
+                )
+                return
+            await self._mount_message(AppMessage(summary))
         elif cmd == "/reload":
             await self._mount_message(UserMessage(command))
             try:
