@@ -60,20 +60,18 @@ DEEPAGENTS_ALLOWED_DIRS=/home/user/projects:/tmp/agent-scratch
 
 ![agent-tui architecture diagram](docs/agent-tui-architecture.svg)
 
-> Full styled version: [docs/agent-tui-architecture.html](docs/agent-tui-architecture.html)
+> Interactive version: [Architecture Diagram](docs/architecture-diagram.html) · [Interactive Course](docs/agent-tui-course.html)
 
 The TUI communicates with any agent backend through `AgentProtocol` — a Python protocol class that emits typed `AgentEvent` objects. A `StubAgent` is included for development and testing.
 
 | Layer | Components |
 |-------|-----------|
-| **UI** | `app.py`, `ChatInput`, `Messages`, `StatusBar`, `Approval/HITL`, Selectors |
-| **Services** | `AgentAdapter` (event dispatch), `Domain/Protocol`, `SessionStore` |
+| **UI** | `app.py`, `ChatInput`, `Messages`, `StatusBar`, `Approval/HITL`, Selectors, MCP Panel |
+| **Services** | `AgentAdapter` (event dispatch), `Domain/Protocol`, `SessionStore`, `MediaTracker`, Hooks |
 | **Backends** | `StubAgent` (mock), `DeepAgentsAdapter` (wraps LangGraph) |
-| **DeepAgents** | `EventTranslator`, `LangGraph`, `LocalShellBackend`, `memory.py`, `skills.py` |
-| **External** | OpenAI API, Tavily API, SQLite, `InMemoryStore`, MCP |
+| **DeepAgents** | `EventTranslator`, `LangGraph`, `LocalShellBackend`, `SandboxBackend`, `MCP Manager`, `WebTools` |
+| **External** | OpenAI/Anthropic/Google/NVIDIA APIs, Tavily, MCP servers, SQLite, PyPI |
 
-**Features:**
-- **Phase 8 (HITL)**: Human-in-the-Loop approval system for sensitive tools (execute, write_file, edit_file, web_search, fetch_url) with interrupt/resume flow via LangGraph
 
 See `src/agent_tui/domain/protocol.py` for the `AgentProtocol` contract.
 

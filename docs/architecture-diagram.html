@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>agent-tui Architecture Diagram</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      margin-bottom: 2rem;
+    }
+    
+    .header-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      background: #22d3ee;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      margin-left: 1.75rem;
+    }
+    
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    
+    svg {
+      width: 100%;
+      min-width: 900px;
+      display: block;
+    }
+    
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .card {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 0.75rem;
+      border: 1px solid #1e293b;
+      padding: 1.25rem;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+    .card-dot.amber { background: #fbbf24; }
+    .card-dot.rose { background: #fb7185; }
+    
+    .card h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .card ul {
+      list-style: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+    
+    .card li {
+      margin-bottom: 0.375rem;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #475569;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>agent-tui Architecture</h1>
+      </div>
+      <p class="subtitle">Terminal UI scaffold for AI coding agents — Protocol-driven, event-streaming, HITL approval</p>
+    </div>
+
+    <!-- Main Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 1000 1100">
+        <!-- Definitions -->
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          </marker>
+          <marker id="arrowhead-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee" />
+          </marker>
+          <marker id="arrowhead-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#34d399" />
+          </marker>
+          <marker id="arrowhead-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa" />
+          </marker>
+          <marker id="arrowhead-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb7185" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- =================================================================
+             LAYER 1: ENTRY POINTS
+             ================================================================= -->
+
+        <!-- CLI Entry Point -->
+        <rect x="30" y="30" width="180" height="70" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="120" y="55" fill="white" font-size="11" font-weight="600" text-anchor="middle">CLI Entry Point</text>
+        <text x="120" y="71" fill="#94a3b8" font-size="9" text-anchor="middle">main.py — argparse</text>
+        <text x="120" y="85" fill="#22d3ee" font-size="8" text-anchor="middle">--agent stub|deepagents</text>
+
+        <!-- =================================================================
+             LAYER 2: CONFIGURATOR
+             ================================================================= -->
+
+        <!-- Configurator Layer -->
+        <rect x="30" y="130" width="180" height="70" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="120" y="155" fill="white" font-size="11" font-weight="600" text-anchor="middle">Configurator</text>
+        <text x="120" y="171" fill="#94a3b8" font-size="9" text-anchor="middle">Settings, env_vars, themes</text>
+        <text x="120" y="185" fill="#94a3b8" font-size="8" text-anchor="middle">.env + shell env loading</text>
+
+        <!-- =================================================================
+             LAYER 3: TUI APP (Textual)
+             ================================================================= -->
+
+        <!-- TUI App Boundary -->
+        <rect x="300" y="20" width="400" height="520" rx="12" fill="rgba(8, 51, 68, 0.15)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="8,4"/>
+        <text x="312" y="38" fill="#22d3ee" font-size="10" font-weight="600">Textual TUI Application</text>
+
+        <!-- AgentTuiApp -->
+        <rect x="320" y="50" width="360" height="80" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="500" y="75" fill="white" font-size="12" font-weight="600" text-anchor="middle">AgentTuiApp</text>
+        <text x="500" y="91" fill="#94a3b8" font-size="9" text-anchor="middle">Textual App — compose(), on_mount()</text>
+        <text x="500" y="105" fill="#22d3ee" font-size="8" text-anchor="middle">Slash commands, keybindings, workers</text>
+        <text x="500" y="119" fill="#94a3b8" font-size="8" text-anchor="middle">21 slash commands · 13 event types</text>
+
+        <!-- Widget Layer -->
+        <rect x="320" y="150" width="170" height="240" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="405" y="170" fill="white" font-size="11" font-weight="600" text-anchor="middle">Widgets</text>
+        <text x="405" y="188" fill="#94a3b8" font-size="8" text-anchor="middle">• ChatInput (autocomplete)</text>
+        <text x="405" y="202" fill="#94a3b8" font-size="8" text-anchor="middle">• Messages (virtualized)</text>
+        <text x="405" y="216" fill="#94a3b8" font-size="8" text-anchor="middle">• MessageStore</text>
+        <text x="405" y="230" fill="#94a3b8" font-size="8" text-anchor="middle">• StatusBar</text>
+        <text x="405" y="244" fill="#94a3b8" font-size="8" text-anchor="middle">• WelcomeBanner</text>
+        <text x="405" y="258" fill="#94a3b8" font-size="8" text-anchor="middle">• Diff viewer</text>
+        <text x="405" y="272" fill="#94a3b8" font-size="8" text-anchor="middle">• Loading spinner</text>
+        <text x="405" y="286" fill="#94a3b8" font-size="8" text-anchor="middle">• History display</text>
+        <text x="405" y="300" fill="#94a3b8" font-size="8" text-anchor="middle">• Tool renderers</text>
+        <text x="405" y="314" fill="#94a3b8" font-size="8" text-anchor="middle">• Tool widgets</text>
+        <text x="405" y="328" fill="#94a3b8" font-size="8" text-anchor="middle">• Theme selector</text>
+        <text x="405" y="342" fill="#94a3b8" font-size="8" text-anchor="middle">• Autocomplete ctrl</text>
+        <text x="405" y="356" fill="#94a3b8" font-size="8" text-anchor="middle">• Notification settings</text>
+        <text x="405" y="376" fill="#22d3ee" font-size="8" text-anchor="middle">18 widget files</text>
+
+        <!-- HITL Layer -->
+        <rect x="510" y="150" width="170" height="120" rx="6" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="595" y="170" fill="white" font-size="11" font-weight="600" text-anchor="middle">HITL Approval</text>
+        <text x="595" y="188" fill="#94a3b8" font-size="8" text-anchor="middle">• ApprovalMenu</text>
+        <text x="595" y="202" fill="#94a3b8" font-size="8" text-anchor="middle">  (Yes / Auto / No)</text>
+        <text x="595" y="216" fill="#94a3b8" font-size="8" text-anchor="middle">• AskUserMenu</text>
+        <text x="595" y="230" fill="#94a3b8" font-size="8" text-anchor="middle">• InterruptOverlay</text>
+        <text x="595" y="244" fill="#fb7185" font-size="8" text-anchor="middle">approve / edit / reject</text>
+        <text x="595" y="258" fill="#94a3b8" font-size="8" text-anchor="middle">• Auto-approve toggle</text>
+
+        <!-- Modals -->
+        <rect x="510" y="290" width="170" height="100" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="595" y="310" fill="white" font-size="11" font-weight="600" text-anchor="middle">Modals</text>
+        <text x="595" y="328" fill="#94a3b8" font-size="8" text-anchor="middle">• ModelSelector</text>
+        <text x="595" y="342" fill="#94a3b8" font-size="8" text-anchor="middle">• ThreadSelector</text>
+        <text x="595" y="356" fill="#94a3b8" font-size="8" text-anchor="middle">• MCPPanel / MCPViewer</text>
+        <text x="595" y="376" fill="#94a3b8" font-size="8" text-anchor="middle">Ctrl+M toggle</text>
+
+        <!-- =================================================================
+             LAYER 4: AGENT ADAPTER
+             ================================================================= -->
+
+        <!-- AgentAdapter -->
+        <rect x="300" y="570" width="400" height="80" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="500" y="595" fill="white" font-size="12" font-weight="600" text-anchor="middle">AgentAdapter</text>
+        <text x="500" y="611" fill="#94a3b8" font-size="9" text-anchor="middle">Event dispatcher — run_task(), _dispatch()</text>
+        <text x="500" y="625" fill="#94a3b8" font-size="8" text-anchor="middle">Security: file allowlist, dangerous shell pattern check</text>
+        <text x="500" y="639" fill="#34d399" font-size="8" text-anchor="middle">13 EventType → semantic app methods</text>
+
+        <!-- =================================================================
+             LAYER 5: AGENT BACKENDS (Strategy Pattern)
+             ================================================================= -->
+
+        <!-- Backend Boundary -->
+        <rect x="300" y="680" width="400" height="300" rx="12" fill="rgba(6, 78, 59, 0.1)" stroke="#34d399" stroke-width="1" stroke-dasharray="8,4"/>
+        <text x="312" y="698" fill="#34d399" font-size="10" font-weight="600">AgentProtocol Implementations</text>
+
+        <!-- StubAgent -->
+        <rect x="320" y="710" width="170" height="100" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="405" y="735" fill="white" font-size="11" font-weight="600" text-anchor="middle">StubAgent</text>
+        <text x="405" y="751" fill="#94a3b8" font-size="9" text-anchor="middle">Mock agent for dev/test</text>
+        <text x="405" y="765" fill="#94a3b8" font-size="8" text-anchor="middle">3 scripted scenarios:</text>
+        <text x="405" y="779" fill="#94a3b8" font-size="8" text-anchor="middle">tool call, ask-user, error</text>
+        <text x="405" y="799" fill="#94a3b8" font-size="8" text-anchor="middle">No API key required</text>
+
+        <!-- DeepAgentsAdapter -->
+        <rect x="510" y="710" width="170" height="60" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="595" y="735" fill="white" font-size="11" font-weight="600" text-anchor="middle">DeepAgentsAdapter</text>
+        <text x="595" y="751" fill="#94a3b8" font-size="9" text-anchor="middle">Real agent backend</text>
+
+        <!-- DeepAgents Sub-components -->
+        <!-- EventTranslator -->
+        <rect x="510" y="790" width="170" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="595" y="814" fill="white" font-size="10" font-weight="600" text-anchor="middle">EventTranslator</text>
+
+        <!-- LocalShellBackend -->
+        <rect x="510" y="840" width="80" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="550" y="864" fill="white" font-size="9" font-weight="600" text-anchor="middle">LocalShell</text>
+
+        <!-- SandboxBackend -->
+        <rect x="600" y="840" width="80" height="40" rx="6" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="640" y="864" fill="white" font-size="9" font-weight="600" text-anchor="middle">Sandbox</text>
+
+        <!-- WebTools -->
+        <rect x="510" y="890" width="80" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="550" y="914" fill="white" font-size="9" font-weight="600" text-anchor="middle">WebTools</text>
+
+        <!-- MCPToolManager -->
+        <rect x="600" y="890" width="80" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="640" y="914" fill="white" font-size="9" font-weight="600" text-anchor="middle">MCP Manager</text>
+
+        <!-- Memory + Skills -->
+        <rect x="510" y="940" width="80" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="550" y="964" fill="white" font-size="9" font-weight="600" text-anchor="middle">Memory</text>
+
+        <rect x="600" y="940" width="80" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="640" y="964" fill="white" font-size="9" font-weight="600" text-anchor="middle">Skills</text>
+
+        <!-- =================================================================
+             LAYER 6: EXTERNAL SERVICES
+             ================================================================= -->
+
+        <!-- External Services Boundary -->
+        <rect x="730" y="20" width="250" height="520" rx="12" fill="rgba(120, 53, 15, 0.05)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="8,4"/>
+        <text x="742" y="38" fill="#fbbf24" font-size="10" font-weight="600">External Services &amp; APIs</text>
+
+        <!-- OpenAI API -->
+        <rect x="750" y="60" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="84" fill="white" font-size="10" font-weight="600" text-anchor="middle">OpenAI API</text>
+
+        <!-- Anthropic API -->
+        <rect x="750" y="110" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="134" fill="white" font-size="10" font-weight="600" text-anchor="middle">Anthropic API</text>
+
+        <!-- Google / VertexAI -->
+        <rect x="750" y="160" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="184" fill="white" font-size="10" font-weight="600" text-anchor="middle">Google API / VertexAI</text>
+
+        <!-- NVIDIA API -->
+        <rect x="750" y="210" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="234" fill="white" font-size="10" font-weight="600" text-anchor="middle">NVIDIA API</text>
+
+        <!-- Tavily Search -->
+        <rect x="750" y="260" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="284" fill="white" font-size="10" font-weight="600" text-anchor="middle">Tavily Web Search</text>
+
+        <!-- MCP Servers -->
+        <rect x="750" y="310" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="334" fill="white" font-size="10" font-weight="600" text-anchor="middle">MCP Servers (stdio)</text>
+
+        <!-- PyPI -->
+        <rect x="750" y="360" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="384" fill="white" font-size="10" font-weight="600" text-anchor="middle">PyPI (update check)</text>
+
+        <!-- httpx / URL Fetch -->
+        <rect x="750" y="410" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="434" fill="white" font-size="10" font-weight="600" text-anchor="middle">httpx (URL fetch)</text>
+
+        <!-- ripgrep -->
+        <rect x="750" y="460" width="210" height="40" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="855" y="484" fill="white" font-size="10" font-weight="600" text-anchor="middle">ripgrep (rg binary)</text>
+
+        <!-- =================================================================
+             LAYER 7: PERSISTENCE
+             ================================================================= -->
+
+        <!-- Session Persistence -->
+        <rect x="30" y="570" width="240" height="80" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="150" y="595" fill="white" font-size="11" font-weight="600" text-anchor="middle">Session Persistence</text>
+        <text x="150" y="611" fill="#94a3b8" font-size="9" text-anchor="middle">aiosqlite · sessions.db</text>
+        <text x="150" y="625" fill="#94a3b8" font-size="8" text-anchor="middle">LangGraph checkpoints</text>
+        <text x="150" y="639" fill="#94a3b8" font-size="8" text-anchor="middle">~/.agent-tui/sessions.db</text>
+
+        <!-- =================================================================
+             LAYER 8: SKILL SYSTEM
+             ================================================================= -->
+
+        <!-- Skill System -->
+        <rect x="30" y="680" width="240" height="120" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="150" y="705" fill="white" font-size="11" font-weight="600" text-anchor="middle">Skill System</text>
+        <text x="150" y="721" fill="#94a3b8" font-size="9" text-anchor="middle">7-tier filesystem discovery</text>
+        <text x="150" y="739" fill="#94a3b8" font-size="8" text-anchor="middle">• built-in • user • project</text>
+        <text x="150" y="753" fill="#94a3b8" font-size="8" text-anchor="middle">• .agents • .claude aliases</text>
+        <text x="150" y="767" fill="#94a3b8" font-size="8" text-anchor="middle">• extra_allowed_dirs</text>
+        <text x="150" y="785" fill="#34d399" font-size="8" text-anchor="middle">Path containment validation</text>
+
+        <!-- =================================================================
+             LAYER 9: SUPPORTING SERVICES
+             ================================================================= -->
+
+        <!-- Supporting Services -->
+        <rect x="30" y="830" width="240" height="150" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="150" y="855" fill="white" font-size="11" font-weight="600" text-anchor="middle">Supporting Services</text>
+        <text x="150" y="873" fill="#94a3b8" font-size="8" text-anchor="middle">• MediaTracker (image input)</text>
+        <text x="150" y="887" fill="#94a3b8" font-size="8" text-anchor="middle">• Hook dispatch system</text>
+        <text x="150" y="901" fill="#94a3b8" font-size="8" text-anchor="middle">• External editor ($EDITOR)</text>
+        <text x="150" y="915" fill="#94a3b8" font-size="8" text-anchor="middle">• Clipboard (pyperclip)</text>
+        <text x="150" y="929" fill="#94a3b8" font-size="8" text-anchor="middle">• File operations</text>
+        <text x="150" y="943" fill="#94a3b8" font-size="8" text-anchor="middle">• Tool output formatting</text>
+        <text x="150" y="957" fill="#94a3b8" font-size="8" text-anchor="middle">• Update check (PyPI)</text>
+        <text x="150" y="971" fill="#94a3b8" font-size="8" text-anchor="middle">• Session stats tracking</text>
+
+        <!-- =================================================================
+             ARROWS - Data Flow
+             ================================================================= -->
+
+        <!-- CLI → Configurator -->
+        <line x1="120" y1="100" x2="120" y2="128" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead-cyan)"/>
+        <text x="135" y="118" fill="#94a3b8" font-size="8">bootstrap</text>
+
+        <!-- CLI → AgentTuiApp -->
+        <line x1="210" y1="65" x2="318" y2="65" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead-cyan)"/>
+        <text x="264" y="59" fill="#94a3b8" font-size="8">launch</text>
+
+        <!-- Configurator → AgentTuiApp -->
+        <line x1="210" y1="165" x2="318" y2="100" stroke="#94a3b8" stroke-width="1" marker-end="url(#arrowhead)"/>
+        <text x="268" y="128" fill="#94a3b8" font-size="8">settings</text>
+
+        <!-- AgentTuiApp → Widgets (internal) -->
+        <line x1="500" y1="130" x2="405" y2="148" stroke="#22d3ee" stroke-width="1" marker-end="url(#arrowhead-cyan)"/>
+
+        <!-- AgentTuiApp → HITL (internal) -->
+        <line x1="500" y1="130" x2="595" y2="148" stroke="#fb7185" stroke-width="1" marker-end="url(#arrowhead-rose)"/>
+
+        <!-- AgentTuiApp → Modals (internal) -->
+        <line x1="500" y1="130" x2="595" y2="288" stroke="#22d3ee" stroke-width="1" marker-end="url(#arrowhead-cyan)"/>
+
+        <!-- AgentTuiApp → AgentAdapter -->
+        <line x1="500" y1="130" x2="500" y2="568" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead-cyan)"/>
+        <text x="515" y="350" fill="#94a3b8" font-size="8">send message</text>
+
+        <!-- AgentAdapter → StubAgent -->
+        <line x1="400" y1="650" x2="405" y2="708" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"/>
+        <text x="410" y="680" fill="#94a3b8" font-size="8">--agent=stub</text>
+
+        <!-- AgentAdapter → DeepAgentsAdapter -->
+        <line x1="550" y1="650" x2="595" y2="708" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"/>
+        <text x="580" y="680" fill="#94a3b8" font-size="8">--agent=deepagents</text>
+
+        <!-- DeepAgentsAdapter → EventTranslator -->
+        <line x1="595" y1="770" x2="595" y2="788" stroke="#34d399" stroke-width="1" marker-end="url(#arrowhead-emerald)"/>
+
+        <!-- DeepAgentsAdapter → LocalShellBackend -->
+        <line x1="550" y1="770" x2="550" y2="838" stroke="#34d399" stroke-width="1" marker-end="url(#arrowhead-emerald)"/>
+
+        <!-- DeepAgentsAdapter → SandboxBackend -->
+        <line x1="580" y1="770" x2="640" y2="838" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowhead-rose)"/>
+
+        <!-- DeepAgentsAdapter → WebTools -->
+        <line x1="550" y1="770" x2="550" y2="888" stroke="#34d399" stroke-width="1" marker-end="url(#arrowhead-emerald)"/>
+
+        <!-- DeepAgentsAdapter → MCPManager -->
+        <line x1="580" y1="770" x2="640" y2="888" stroke="#34d399" stroke-width="1" marker-end="url(#arrowhead-emerald)"/>
+
+        <!-- DeepAgentsAdapter → Memory -->
+        <line x1="550" y1="770" x2="550" y2="938" stroke="#34d399" stroke-width="1" marker-end="url(#arrowhead-emerald)"/>
+
+        <!-- DeepAgentsAdapter → Skills -->
+        <line x1="580" y1="770" x2="640" y2="938" stroke="#34d399" stroke-width="1" marker-end="url(#arrowhead-emerald)"/>
+
+        <!-- DeepAgents → External APIs -->
+        <line x1="680" y1="740" x2="748" y2="80" stroke="#fbbf24" stroke-width="1" marker-end="url(#arrowhead)"/>
+        <text x="720" y="420" fill="#94a3b8" font-size="8">LLM calls</text>
+
+        <line x1="680" y1="740" x2="748" y2="280" stroke="#fbbf24" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+        <line x1="680" y1="740" x2="748" y2="330" stroke="#fbbf24" stroke-width="1" marker-end="url(#arrowhead)"/>
+        <text x="720" y="540" fill="#94a3b8" font-size="8">MCP tools</text>
+
+        <!-- AgentAdapter → Session Persistence -->
+        <line x1="300" y1="610" x2="272" y2="610" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrowhead-violet)"/>
+        <text x="286" y="604" fill="#94a3b8" font-size="8">checkpoints</text>
+
+        <!-- AgentAdapter → Skill System -->
+        <line x1="300" y1="630" x2="272" y2="720" stroke="#34d399" stroke-width="1" marker-end="url(#arrowhead-emerald)"/>
+        <text x="286" y="680" fill="#94a3b8" font-size="8">skills</text>
+
+        <!-- AgentAdapter → Supporting Services -->
+        <line x1="300" y1="640" x2="272" y2="880" stroke="#94a3b8" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+        <!-- EventTranslator → AgentAdapter (event stream back) -->
+        <path d="M 510 810 Q 280 810 280 650 Q 280 610 298 610" fill="none" stroke="#34d399" stroke-width="1.5" stroke-dasharray="5,5" marker-end="url(#arrowhead-emerald)"/>
+        <text x="395" y="720" fill="#34d399" font-size="8">AgentEvent stream</text>
+
+        <!-- =================================================================
+             LEGEND
+             ================================================================= -->
+        <text x="750" y="570" fill="white" font-size="10" font-weight="600">Legend</text>
+        
+        <rect x="750" y="582" width="16" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="772" y="590" fill="#94a3b8" font-size="8">Frontend / TUI</text>
+        
+        <rect x="750" y="598" width="16" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
+        <text x="772" y="606" fill="#94a3b8" font-size="8">Backend / Services</text>
+        
+        <rect x="750" y="614" width="16" height="10" rx="2" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1"/>
+        <text x="772" y="622" fill="#94a3b8" font-size="8">External API</text>
+        
+        <rect x="750" y="630" width="16" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="772" y="638" fill="#94a3b8" font-size="8">Database</text>
+        
+        <rect x="750" y="646" width="16" height="10" rx="2" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1"/>
+        <text x="772" y="654" fill="#94a3b8" font-size="8">Security / HITL</text>
+        
+        <rect x="750" y="662" width="16" height="10" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
+        <text x="772" y="670" fill="#94a3b8" font-size="8">Generic / Config</text>
+
+        <line x1="750" y1="686" x2="766" y2="686" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="772" y="689" fill="#94a3b8" font-size="8">Security flow</text>
+
+        <line x1="750" y1="702" x2="766" y2="702" stroke="#34d399" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="772" y="705" fill="#94a3b8" font-size="8">Event stream</text>
+
+        <rect x="750" y="714" width="16" height="10" rx="2" fill="transparent" stroke="#34d399" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="772" y="722" fill="#94a3b8" font-size="8">Boundary group</text>
+      </svg>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot cyan"></div>
+          <h3>TUI Layer (Textual)</h3>
+        </div>
+        <ul>
+          <li>• AgentTuiApp — main Textual app</li>
+          <li>• 18 widget files (ChatInput, Messages, etc.)</li>
+          <li>• 21 slash commands with autocomplete</li>
+          <li>• Virtualized message store for long chats</li>
+          <li>• Background workers for non-blocking startup</li>
+          <li>• Theme switching, model selector, thread browser</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot emerald"></div>
+          <h3>Agent Backends</h3>
+        </div>
+        <ul>
+          <li>• AgentProtocol — clean interface contract</li>
+          <li>• StubAgent — mock for dev/testing</li>
+          <li>• DeepAgentsAdapter — real agent via deepagents SDK</li>
+          <li>• EventTranslator — LangGraph → AgentEvent mapping</li>
+          <li>• LocalShellBackend + SandboxBackend</li>
+          <li>• MCP server management (stdio-based)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
+          <h3>Security &amp; HITL</h3>
+        </div>
+        <ul>
+          <li>• ApprovalMenu — Yes/Auto/No for tool calls</li>
+          <li>• AskUserMenu — interactive question flow</li>
+          <li>• InterruptOverlay — mid-execution approve/edit/reject</li>
+          <li>• Dangerous shell pattern detection (14 patterns)</li>
+          <li>• File path allowlisting (DEEPAGENTS_ALLOWED_DIRS)</li>
+          <li>• Skill path containment validation</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>Persistence &amp; State</h3>
+        </div>
+        <ul>
+          <li>• SQLite (aiosqlite) — session checkpoints</li>
+          <li>• LangGraph MemorySaver integration</li>
+          <li>• Thread management (list, delete, resume)</li>
+          <li>• UUID7 for time-ordered thread IDs</li>
+          <li>• Message count caching with freshness tokens</li>
+          <li>• Session stats (tokens, time, turns)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot amber"></div>
+          <h3>External Integrations</h3>
+        </div>
+        <ul>
+          <li>• OpenAI / Anthropic / Google / NVIDIA APIs</li>
+          <li>• Tavily web search + httpx URL fetch</li>
+          <li>• MCP servers via .mcp.json config</li>
+          <li>• PyPI version checking (auto-update)</li>
+          <li>• ripgrep (rg) as faster grep fallback</li>
+          <li>• AGENTS.md memory sources (user + project)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot cyan"></div>
+          <h3>Skill System</h3>
+        </div>
+        <ul>
+          <li>• 7-tier filesystem discovery with precedence</li>
+          <li>• built-in → user → project → .agents → .claude</li>
+          <li>• YAML front-matter stripping</li>
+          <li>• Symlink traversal protection</li>
+          <li>• AGENT_TUI_EXTRA_SKILLS_DIRS env var</li>
+          <li>• Skill invocation with metadata envelopes</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="footer">
+      agent-tui • Textual TUI + DeepAgents SDK • Protocol-driven event streaming • 13 event types • 21 slash commands
+    </p>
+  </div>
+</body>
+</html>
