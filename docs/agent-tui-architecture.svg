@@ -1,0 +1,250 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 780" style="background:#020617;font-family:ui-monospace,SFMono-Regular,'Cascadia Code','Fira Code',monospace">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+    </marker>
+    <marker id="arr-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee"/>
+    </marker>
+    <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
+    </marker>
+    <marker id="arr-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
+    </marker>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+
+  <!-- ===== ARROWS (drawn first) ===== -->
+  <line x1="475" y1="72" x2="475" y2="97" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="475" y1="153" x2="475" y2="166" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="603" y1="127" x2="858" y2="127" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr-amber)"/>
+  <line x1="170" y1="342" x2="170" y2="362" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+  <line x1="380" y1="342" x2="340" y2="362" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+  <line x1="530" y1="342" x2="490" y2="362" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+  <line x1="110" y1="415" x2="95" y2="438" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="195" y1="415" x2="255" y2="438" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <line x1="285" y1="390" x2="197" y2="390" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-violet)"/>
+  <path d="M 460 415 Q 460 440 120 625" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr-violet)"/>
+  <line x1="300" y1="493" x2="300" y2="513" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <line x1="310" y1="599" x2="360" y2="622" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arr-amber)"/>
+  <line x1="155" y1="599" x2="210" y2="622" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-violet)"/>
+  <line x1="615" y1="599" x2="555" y2="622" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arr-amber)"/>
+
+  <!-- ===== REGION BOUNDARIES ===== -->
+  <rect x="16" y="166" width="820" height="172" rx="10" fill="rgba(8,51,68,0.12)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="7,4"/>
+  <text x="29" y="181" fill="#22d3ee" font-size="9" font-weight="600">TUI App  ·  Textual 8.x</text>
+
+  <rect x="16" y="513" width="836" height="86" rx="10" fill="rgba(6,78,59,0.10)" stroke="#34d399" stroke-width="1" stroke-dasharray="7,4"/>
+  <text x="29" y="527" fill="#34d399" font-size="9" font-weight="600">DeepAgents Subsystem</text>
+
+  <!-- ===== USER TERMINAL ===== -->
+  <rect x="378" y="20" width="194" height="50" rx="6" fill="#0f172a"/>
+  <rect x="378" y="20" width="194" height="50" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="475" y="41" fill="white" font-size="11" font-weight="600" text-anchor="middle">User / Terminal</text>
+  <text x="475" y="57" fill="#94a3b8" font-size="9" text-anchor="middle">keyboard input + display</text>
+
+  <!-- ===== CLI ===== -->
+  <rect x="350" y="100" width="250" height="52" rx="6" fill="#0f172a"/>
+  <rect x="350" y="100" width="250" height="52" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="475" y="122" fill="white" font-size="11" font-weight="600" text-anchor="middle">CLI Entry  ·  main.py</text>
+  <text x="475" y="138" fill="#94a3b8" font-size="9" text-anchor="middle">argparse · bootstrap · agent selection</text>
+
+  <!-- ===== CONFIGURATOR ===== -->
+  <rect x="858" y="95" width="182" height="248" rx="6" fill="#0f172a"/>
+  <rect x="858" y="95" width="182" height="248" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="949" y="117" fill="white" font-size="11" font-weight="600" text-anchor="middle">Configurator</text>
+  <text x="949" y="134" fill="#fbbf24" font-size="8" text-anchor="middle">configurator/</text>
+  <text x="878" y="156" fill="#94a3b8" font-size="8">• settings.py</text>
+  <text x="878" y="172" fill="#94a3b8" font-size="8">• model_config.py</text>
+  <text x="878" y="188" fill="#94a3b8" font-size="8">• theme.py</text>
+  <text x="878" y="204" fill="#94a3b8" font-size="8">• glyphs.py</text>
+  <text x="878" y="220" fill="#94a3b8" font-size="8">• .env discovery</text>
+  <text x="878" y="236" fill="#94a3b8" font-size="8">• config.toml</text>
+  <text x="878" y="258" fill="#fbbf24" font-size="7">~/.agent-tui/ + project .env</text>
+  <text x="878" y="274" fill="#94a3b8" font-size="7">deps: python-dotenv</text>
+  <text x="878" y="286" fill="#94a3b8" font-size="7">     tomli-w · PyYAML</text>
+  <text x="878" y="298" fill="#94a3b8" font-size="7">     packaging · Rich</text>
+
+  <!-- ===== WIDGETS INSIDE TUI APP ===== -->
+  <!-- app.py -->
+  <rect x="28" y="186" width="130" height="62" rx="6" fill="#0f172a"/>
+  <rect x="28" y="186" width="130" height="62" rx="6" fill="rgba(8,51,68,0.5)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="93" y="207" fill="white" font-size="11" font-weight="600" text-anchor="middle">app.py</text>
+  <text x="93" y="222" fill="#94a3b8" font-size="8" text-anchor="middle">TUI orchestration</text>
+  <text x="93" y="235" fill="#94a3b8" font-size="8" text-anchor="middle">state + keybindings</text>
+
+  <!-- ChatInput -->
+  <rect x="172" y="186" width="120" height="62" rx="6" fill="#0f172a"/>
+  <rect x="172" y="186" width="120" height="62" rx="6" fill="rgba(8,51,68,0.5)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="232" y="207" fill="white" font-size="11" font-weight="600" text-anchor="middle">ChatInput</text>
+  <text x="232" y="222" fill="#94a3b8" font-size="8" text-anchor="middle">input + autocomplete</text>
+  <text x="232" y="235" fill="#94a3b8" font-size="8" text-anchor="middle">slash commands</text>
+
+  <!-- Messages -->
+  <rect x="304" y="186" width="145" height="62" rx="6" fill="#0f172a"/>
+  <rect x="304" y="186" width="145" height="62" rx="6" fill="rgba(8,51,68,0.5)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="376" y="207" fill="white" font-size="11" font-weight="600" text-anchor="middle">Messages</text>
+  <text x="376" y="222" fill="#94a3b8" font-size="8" text-anchor="middle">virtualized store</text>
+  <text x="376" y="235" fill="#94a3b8" font-size="8" text-anchor="middle">user/assistant/tool</text>
+
+  <!-- StatusBar -->
+  <rect x="461" y="186" width="125" height="62" rx="6" fill="#0f172a"/>
+  <rect x="461" y="186" width="125" height="62" rx="6" fill="rgba(8,51,68,0.5)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="523" y="207" fill="white" font-size="11" font-weight="600" text-anchor="middle">StatusBar</text>
+  <text x="523" y="222" fill="#94a3b8" font-size="8" text-anchor="middle">tokens · model</text>
+  <text x="523" y="235" fill="#94a3b8" font-size="8" text-anchor="middle">status text</text>
+
+  <!-- Approval / HITL -->
+  <rect x="598" y="186" width="130" height="62" rx="6" fill="#0f172a"/>
+  <rect x="598" y="186" width="130" height="62" rx="6" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
+  <text x="663" y="207" fill="white" font-size="11" font-weight="600" text-anchor="middle">Approval / HITL</text>
+  <text x="663" y="222" fill="#94a3b8" font-size="8" text-anchor="middle">approve/deny tools</text>
+  <text x="663" y="235" fill="#94a3b8" font-size="8" text-anchor="middle">ask_user prompts</text>
+
+  <!-- Selectors -->
+  <rect x="740" y="186" width="86" height="62" rx="6" fill="#0f172a"/>
+  <rect x="740" y="186" width="86" height="62" rx="6" fill="rgba(8,51,68,0.5)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="783" y="207" fill="white" font-size="10" font-weight="600" text-anchor="middle">Selectors</text>
+  <text x="783" y="222" fill="#94a3b8" font-size="8" text-anchor="middle">model · theme</text>
+  <text x="783" y="235" fill="#94a3b8" font-size="8" text-anchor="middle">thread · MCP</text>
+
+  <!-- ===== SERVICES ROW ===== -->
+  <rect x="16" y="362" width="178" height="52" rx="6" fill="#0f172a"/>
+  <rect x="16" y="362" width="178" height="52" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="105" y="383" fill="white" font-size="11" font-weight="600" text-anchor="middle">AgentAdapter</text>
+  <text x="105" y="398" fill="#94a3b8" font-size="9" text-anchor="middle">event dispatch → app methods</text>
+
+  <rect x="206" y="362" width="175" height="52" rx="6" fill="#0f172a"/>
+  <rect x="206" y="362" width="175" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="293" y="381" fill="white" font-size="11" font-weight="600" text-anchor="middle">Domain / Protocol</text>
+  <text x="293" y="396" fill="#94a3b8" font-size="8" text-anchor="middle">AgentProtocol · AgentEvent</text>
+  <text x="293" y="408" fill="#94a3b8" font-size="8" text-anchor="middle">EventType · SessionStats</text>
+
+  <rect x="393" y="362" width="155" height="52" rx="6" fill="#0f172a"/>
+  <rect x="393" y="362" width="155" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="470" y="381" fill="white" font-size="11" font-weight="600" text-anchor="middle">Session Store</text>
+  <text x="470" y="396" fill="#94a3b8" font-size="8" text-anchor="middle">thread persistence</text>
+  <text x="470" y="408" fill="#94a3b8" font-size="8" text-anchor="middle">aiosqlite</text>
+
+  <!-- ===== AGENT BACKENDS ===== -->
+  <rect x="16" y="438" width="165" height="52" rx="6" fill="#0f172a"/>
+  <rect x="16" y="438" width="165" height="52" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="98" y="458" fill="white" font-size="11" font-weight="600" text-anchor="middle">StubAgent</text>
+  <text x="98" y="473" fill="#94a3b8" font-size="9" text-anchor="middle">mock · no ext deps</text>
+
+  <rect x="193" y="438" width="210" height="52" rx="6" fill="#0f172a"/>
+  <rect x="193" y="438" width="210" height="52" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="298" y="458" fill="white" font-size="11" font-weight="600" text-anchor="middle">DeepAgentsAdapter</text>
+  <text x="298" y="473" fill="#94a3b8" font-size="9" text-anchor="middle">lazy load · tool approval · model switch</text>
+
+  <!-- ===== DEEPAGENTS SUBSYSTEM ===== -->
+  <rect x="28" y="530" width="160" height="55" rx="6" fill="#0f172a"/>
+  <rect x="28" y="530" width="160" height="55" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="108" y="550" fill="white" font-size="10" font-weight="600" text-anchor="middle">EventTranslator</text>
+  <text x="108" y="564" fill="#94a3b8" font-size="8" text-anchor="middle">LangGraph events</text>
+  <text x="108" y="576" fill="#94a3b8" font-size="8" text-anchor="middle">→ AgentEvent stream</text>
+
+  <rect x="200" y="530" width="140" height="55" rx="6" fill="#0f172a"/>
+  <rect x="200" y="530" width="140" height="55" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="270" y="550" fill="white" font-size="10" font-weight="600" text-anchor="middle">LangGraph</text>
+  <text x="270" y="564" fill="#94a3b8" font-size="8" text-anchor="middle">graph execution</text>
+  <text x="270" y="576" fill="#94a3b8" font-size="8" text-anchor="middle">MemorySaver</text>
+
+  <rect x="352" y="530" width="160" height="55" rx="6" fill="#0f172a"/>
+  <rect x="352" y="530" width="160" height="55" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="432" y="550" fill="white" font-size="10" font-weight="600" text-anchor="middle">LocalShellBackend</text>
+  <text x="432" y="564" fill="#94a3b8" font-size="8" text-anchor="middle">file ops + shell exec</text>
+  <text x="432" y="576" fill="#94a3b8" font-size="8" text-anchor="middle">rooted at cwd</text>
+
+  <rect x="524" y="530" width="148" height="55" rx="6" fill="#0f172a"/>
+  <rect x="524" y="530" width="148" height="55" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="598" y="550" fill="white" font-size="10" font-weight="600" text-anchor="middle">memory.py</text>
+  <text x="598" y="564" fill="#94a3b8" font-size="8" text-anchor="middle">AGENTS.md discovery</text>
+  <text x="598" y="576" fill="#94a3b8" font-size="8" text-anchor="middle">~/.deepagents/ + cwd</text>
+
+  <rect x="684" y="530" width="148" height="55" rx="6" fill="#0f172a"/>
+  <rect x="684" y="530" width="148" height="55" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="758" y="550" fill="white" font-size="10" font-weight="600" text-anchor="middle">skills.py</text>
+  <text x="758" y="564" fill="#94a3b8" font-size="8" text-anchor="middle">.md skill files</text>
+  <text x="758" y="576" fill="#94a3b8" font-size="8" text-anchor="middle">.deepagents/skills/</text>
+
+  <!-- ===== EXTERNAL SERVICES ===== -->
+  <rect x="16" y="622" width="130" height="52" rx="6" fill="#0f172a"/>
+  <rect x="16" y="622" width="130" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="81" y="643" fill="white" font-size="10" font-weight="600" text-anchor="middle">SQLite</text>
+  <text x="81" y="657" fill="#94a3b8" font-size="8" text-anchor="middle">thread checkpoints</text>
+  <text x="81" y="668" fill="#a78bfa" font-size="7" text-anchor="middle">aiosqlite</text>
+
+  <rect x="158" y="622" width="148" height="52" rx="6" fill="#0f172a"/>
+  <rect x="158" y="622" width="148" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="232" y="643" fill="white" font-size="10" font-weight="600" text-anchor="middle">InMemoryStore</text>
+  <text x="232" y="657" fill="#94a3b8" font-size="8" text-anchor="middle">cross-thread state</text>
+  <text x="232" y="668" fill="#a78bfa" font-size="7" text-anchor="middle">langgraph.store</text>
+
+  <rect x="320" y="622" width="145" height="52" rx="6" fill="#0f172a"/>
+  <rect x="320" y="622" width="145" height="52" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="392" y="643" fill="white" font-size="10" font-weight="600" text-anchor="middle">OpenAI API</text>
+  <text x="392" y="657" fill="#94a3b8" font-size="8" text-anchor="middle">gpt-4o / gpt-5.2</text>
+  <text x="392" y="668" fill="#fbbf24" font-size="7" text-anchor="middle">langchain-openai</text>
+
+  <rect x="477" y="622" width="135" height="52" rx="6" fill="#0f172a"/>
+  <rect x="477" y="622" width="135" height="52" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="544" y="643" fill="white" font-size="10" font-weight="600" text-anchor="middle">Tavily API</text>
+  <text x="544" y="657" fill="#94a3b8" font-size="8" text-anchor="middle">web search</text>
+  <text x="544" y="668" fill="#fbbf24" font-size="7" text-anchor="middle">TAVILY_API_KEY</text>
+
+  <rect x="624" y="622" width="130" height="52" rx="6" fill="#0f172a"/>
+  <rect x="624" y="622" width="130" height="52" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="689" y="643" fill="white" font-size="10" font-weight="600" text-anchor="middle">MCP</text>
+  <text x="689" y="657" fill="#94a3b8" font-size="8" text-anchor="middle">Model Context Protocol</text>
+  <text x="689" y="668" fill="#64748b" font-size="7" text-anchor="middle">extensible tool servers</text>
+
+  <rect x="766" y="622" width="90" height="52" rx="6" fill="#0f172a"/>
+  <rect x="766" y="622" width="90" height="52" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="811" y="643" fill="white" font-size="9" font-weight="600" text-anchor="middle">fetch_url</text>
+  <text x="811" y="657" fill="#94a3b8" font-size="8" text-anchor="middle">httpx + html</text>
+  <text x="811" y="668" fill="#fbbf24" font-size="7" text-anchor="middle">markdownify</text>
+
+  <!-- ===== LEGEND ===== -->
+  <text x="873" y="375" fill="white" font-size="10" font-weight="600">Legend</text>
+  <rect x="873" y="386" width="14" height="10" rx="2" fill="#0f172a"/>
+  <rect x="873" y="386" width="14" height="10" rx="2" fill="rgba(8,51,68,0.5)" stroke="#22d3ee" stroke-width="1"/>
+  <text x="893" y="395" fill="#94a3b8" font-size="8">TUI / Frontend</text>
+  <rect x="873" y="403" width="14" height="10" rx="2" fill="#0f172a"/>
+  <rect x="873" y="403" width="14" height="10" rx="2" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1"/>
+  <text x="893" y="412" fill="#94a3b8" font-size="8">Backend / Service</text>
+  <rect x="873" y="420" width="14" height="10" rx="2" fill="#0f172a"/>
+  <rect x="873" y="420" width="14" height="10" rx="2" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1"/>
+  <text x="893" y="429" fill="#94a3b8" font-size="8">Domain / Storage</text>
+  <rect x="873" y="437" width="14" height="10" rx="2" fill="#0f172a"/>
+  <rect x="873" y="437" width="14" height="10" rx="2" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1"/>
+  <text x="893" y="446" fill="#94a3b8" font-size="8">External / Cloud API</text>
+  <rect x="873" y="454" width="14" height="10" rx="2" fill="#0f172a"/>
+  <rect x="873" y="454" width="14" height="10" rx="2" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1"/>
+  <text x="893" y="463" fill="#94a3b8" font-size="8">Security / HITL</text>
+  <rect x="873" y="471" width="14" height="10" rx="2" fill="#0f172a"/>
+  <rect x="873" y="471" width="14" height="10" rx="2" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="893" y="480" fill="#94a3b8" font-size="8">External / Generic</text>
+  <line x1="873" y1="494" x2="887" y2="494" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="893" y="498" fill="#94a3b8" font-size="8">Config flow</text>
+  <line x1="873" y1="511" x2="887" y2="511" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="893" y="515" fill="#94a3b8" font-size="8">Persistence / Protocol</text>
+
+  <!-- Layer labels -->
+  <text x="4" y="50" fill="#475569" font-size="8" font-weight="600">INPUT</text>
+  <text x="4" y="132" fill="#475569" font-size="8" font-weight="600">ENTRY</text>
+  <text x="4" y="265" fill="#475569" font-size="8" font-weight="600">UI</text>
+  <text x="4" y="395" fill="#475569" font-size="8" font-weight="600">SVC</text>
+  <text x="4" y="475" fill="#475569" font-size="8" font-weight="600">AGENT</text>
+  <text x="4" y="565" fill="#475569" font-size="8" font-weight="600">CORE</text>
+  <text x="4" y="655" fill="#475569" font-size="8" font-weight="600">EXT</text>
+</svg>

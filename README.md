@@ -58,9 +58,21 @@ DEEPAGENTS_ALLOWED_DIRS=/home/user/projects:/tmp/agent-scratch
 
 ## Architecture
 
+![agent-tui architecture diagram](docs/agent-tui-architecture.svg)
+
+> Full styled version: [docs/agent-tui-architecture.html](docs/agent-tui-architecture.html)
+
 The TUI communicates with any agent backend through `AgentProtocol` — a Python protocol class that emits typed `AgentEvent` objects. A `StubAgent` is included for development and testing.
 
-See `agent_tui/protocol.py` for the contract.
+| Layer | Components |
+|-------|-----------|
+| **UI** | `app.py`, `ChatInput`, `Messages`, `StatusBar`, `Approval/HITL`, Selectors |
+| **Services** | `AgentAdapter` (event dispatch), `Domain/Protocol`, `SessionStore` |
+| **Backends** | `StubAgent` (mock), `DeepAgentsAdapter` (wraps LangGraph) |
+| **DeepAgents** | `EventTranslator`, `LangGraph`, `LocalShellBackend`, `memory.py`, `skills.py` |
+| **External** | OpenAI API, Tavily API, SQLite, `InMemoryStore`, MCP |
+
+See `src/agent_tui/domain/protocol.py` for the `AgentProtocol` contract.
 
 ## Running Tests
 
