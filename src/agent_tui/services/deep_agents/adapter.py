@@ -79,6 +79,7 @@ class DeepAgentsAdapter:
         self._pending_tool_id: str | None = None
         self._answer_event: asyncio.Event | None = None
         self._user_answer: str = ""
+        self._store: Any = None
 
         self._deepagents_available = self._check_deepagents_available()
 
@@ -129,7 +130,7 @@ class DeepAgentsAdapter:
             from langchain.chat_models import init_chat_model
             from langgraph.checkpoint.memory import MemorySaver
 
-            from agent_tui.services.deep_agents.backend import create_backend
+            from agent_tui.services.deep_agents.backend import create_backend, create_store
             from agent_tui.services.deep_agents.memory import get_memory_sources
             from agent_tui.services.deep_agents.web_tools import (
                 create_fetch_url_tool,
@@ -167,11 +168,15 @@ class DeepAgentsAdapter:
             skill_sources = get_skill_sources()
             skill_kwargs = {"skills": skill_sources} if skill_sources else {}
 
+            if self._store is None:
+                self._store = create_store()
+
             self._agent = create_deep_agent(
                 model=model,
                 checkpointer=checkpointer,
                 backend=backend,
                 tools=tools,
+                store=self._store,
                 **memory_kwargs,
                 **skill_kwargs,
             )
