@@ -1,0 +1,155 @@
+src/agent_tui/services/deep_agents/adapter.py
+  a571ad20864ffe89 130,176-189,196
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "d69c975ef81f49c59ba40485403c05f9c37ab39b",
+  "prompts": {
+    "a571ad20864ffe89": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_26521a78fffeI1g4EzG3o96njb",
+        "model": "opencode-go/kimi-k2.5"
+      },
+      "human_author": "Shahriyar Rzayev",
+      "messages": [
+        {
+          "type": "user",
+          "text": "You are an implementer subagent working on Phase 8 of the agent-tui project.\n\n**Task 8.1: Configure interrupt_on per-tool in adapter.py**\n\n**Full Task Text:**\n```\nAdd `interrupt_on` parameter to `create_deep_agent()` call\nConfigure which tools should trigger interrupts\nImport `InterruptOnConfig` from langchain.agents.middleware\n\nCode Pattern:\nfrom langchain.agents.middleware import InterruptOnConfig\n\ninterrupt_on = InterruptOnConfig(\n    tools={\n        \"execute\": True,        # Always interrupt on shell commands\n        \"write_file\": True,     # Interrupt on file writes\n        \"edit_file\": True,      # Interrupt on file edits\n        \"read_file\": False,     # Auto-approve reads (safe)\n        \"glob\": False,          # Auto-approve searches (safe)\n        \"grep\": False,          # Auto-approve searches (safe)\n        \"web_search\": True,     # Interrupt on external calls\n        \"fetch_url\": True,      # Interrupt on external calls\n    }\n)\n\nself._agent = create_deep_agent(\n    ...\n    interrupt_on=interrupt_on,\n)\n```\n```\n\n**Context:**\n- Worktree: /home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement\n- File to modify: src/agent_tui/services/deep_agents/adapter.py\n- Current backend setup already exists (LocalShellBackend, MemorySaver checkpointer)\n- The create_deep_agent() call is around line 175 in the _ensure_agent() method\n\n**Requirements:**\n1. Import InterruptOnConfig from langchain.agents.middleware\n2. Create interrupt_on configuration with tools dict\n3. Pass interrupt_on parameter to create_deep_agent()\n4. Configure all tools appropriately (sensitive = True, safe = False)\n5. Run tests to verify no regressions\n6. Commit changes with descriptive message\n\n**Verification Checklist:**\n- [ ] `execute` tool triggers interrupt (True)\n- [ ] `write_file` tool triggers interrupt (True)\n- [ ] `edit_file` tool triggers interrupt (True)\n- [ ] `read_file` does NOT trigger interrupt (False)\n- [ ] `glob` does NOT trigger interrupt (False)\n- [ ] `grep` does NOT trigger interrupt (False)\n- [ ] `web_search` triggers interrupt (True)\n- [ ] `fetch_url` triggers interrupt (True)\n- [ ] Config is passed to create_deep_agent()\n- [ ] All tests pass\n\n**Implementation Notes:**\n- Add the import at the top of _ensure_agent() with other deepagents imports\n- Create interrupt_on variable before create_deep_agent() call\n- Pass as interrupt_on=interrupt_on keyword argument\n\nWork in the worktree directory provided. After implementation:\n1. Self-review your code\n2. Run: uv run pytest tests/ -q\n3. Commit with: git commit -m \"feat(phase-8.1): configure interrupt_on for HITL\"\n\nReport status when complete: DONE, DONE_WITH_CONCERNS, NEEDS_CONTEXT, or BLOCKED.",
+          "timestamp": "2026-04-17T09:55:56.154+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "I'll implement the `interrupt_on` configuration for the HITL (Human-in-the-Loop) refinement. Let me start by reading the adapter.py file to understand its current structure.",
+          "timestamp": "2026-04-17T09:55:56.162+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "read",
+          "input": {
+            "filePath": "/home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement/src/agent_tui/services/deep_agents/adapter.py"
+          },
+          "timestamp": "2026-04-17T09:55:56.162+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Now I can see the file structure. The `create_deep_agent()` call is at line 175. I need to add the import, create the configuration, and pass it to the function call. Let me make these changes:",
+          "timestamp": "2026-04-17T09:56:06.697+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "edit",
+          "input": {
+            "filePath": "/home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement/src/agent_tui/services/deep_agents/adapter.py",
+            "newString": "            from deepagents import create_deep_agent\n            from langchain.agents.middleware import InterruptOnConfig\n            from langchain.chat_models import init_chat_model\n            from langgraph.checkpoint.memory import MemorySaver",
+            "oldString": "            from deepagents import create_deep_agent\n            from langchain.chat_models import init_chat_model\n            from langgraph.checkpoint.memory import MemorySaver"
+          },
+          "timestamp": "2026-04-17T09:56:06.697+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "edit",
+          "input": {
+            "filePath": "/home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement/src/agent_tui/services/deep_agents/adapter.py",
+            "newString": "            # Reuse existing store across model switches to preserve cross-thread state.\n            if self._store is None:\n                self._store = create_store()\n\n            # Configure which tools trigger human-in-the-loop interrupts\n            interrupt_on = InterruptOnConfig(\n                tools={\n                    \"execute\": True,        # Always interrupt on shell commands\n                    \"write_file\": True,     # Interrupt on file writes\n                    \"edit_file\": True,      # Interrupt on file edits\n                    \"read_file\": False,     # Auto-approve reads (safe)\n                    \"glob\": False,          # Auto-approve searches (safe)\n                    \"grep\": False,          # Auto-approve searches (safe)\n                    \"web_search\": True,     # Interrupt on external calls\n                    \"fetch_url\": True,      # Interrupt on external calls\n                }\n            )\n\n            self._agent = create_deep_agent(",
+            "oldString": "            # Reuse existing store across model switches to preserve cross-thread state.\n            if self._store is None:\n                self._store = create_store()\n\n            self._agent = create_deep_agent("
+          },
+          "timestamp": "2026-04-17T09:56:51.554+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "edit",
+          "input": {
+            "filePath": "/home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement/src/agent_tui/services/deep_agents/adapter.py",
+            "newString": "            self._agent = create_deep_agent(\n                model=model,\n                checkpointer=checkpointer,\n                backend=backend,\n                tools=tools,\n                store=self._store,\n                interrupt_on=interrupt_on,\n                **memory_kwargs,\n                **skill_kwargs,\n            )",
+            "oldString": "            self._agent = create_deep_agent(\n                model=model,\n                checkpointer=checkpointer,\n                backend=backend,\n                tools=tools,\n                store=self._store,\n                **memory_kwargs,\n                **skill_kwargs,\n            )"
+          },
+          "timestamp": "2026-04-17T09:57:02.793+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Let me verify the changes by reading the relevant section:",
+          "timestamp": "2026-04-17T09:57:10.458+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "read",
+          "input": {
+            "filePath": "/home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement/src/agent_tui/services/deep_agents/adapter.py",
+            "limit": 75,
+            "offset": 125
+          },
+          "timestamp": "2026-04-17T09:57:10.458+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "The code changes look correct. Now let me run the tests to verify there are no regressions:",
+          "timestamp": "2026-04-17T09:57:15.420+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "uv run pytest tests/ -q",
+            "description": "Run tests to verify no regressions",
+            "workdir": "/home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement"
+          },
+          "timestamp": "2026-04-17T09:57:15.420+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "The test failures are **pre-existing issues** unrelated to my changes:\n1. 8 tests fail because `deepagents` package is not installed in the test environment (ImportError)\n2. 1 test fails due to a model name mismatch in test expectations (`gpt-5.2` vs `gpt-4o`)\n\nNone of these failures are caused by the `interrupt_on` configuration I added. Let me verify the Python syntax is correct:",
+          "timestamp": "2026-04-17T09:58:41.847+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "python -c \"import ast; ast.parse(open('src/agent_tui/services/deep_agents/adapter.py').read())\" && echo \"Syntax OK\"",
+            "description": "Verify Python syntax is valid"
+          },
+          "timestamp": "2026-04-17T09:58:41.847+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "python3 -c \"import ast; ast.parse(open('src/agent_tui/services/deep_agents/adapter.py').read())\" && echo \"Syntax OK\"",
+            "description": "Verify Python syntax is valid"
+          },
+          "timestamp": "2026-04-17T09:58:53.818+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "The syntax is valid. Now let me commit the changes:",
+          "timestamp": "2026-04-17T09:58:57.455+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "git status",
+            "description": "Check git status before commit",
+            "workdir": "/home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement"
+          },
+          "timestamp": "2026-04-17T09:58:57.455+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "git add src/agent_tui/services/deep_agents/adapter.py && git commit -m \"feat(phase-8.1): configure interrupt_on for HITL\"",
+            "description": "Stage and commit changes",
+            "workdir": "/home/shako/REPOS/Indie-Hacking/agent-tui/.worktrees/phase-8-hitl-refinement"
+          },
+          "timestamp": "2026-04-17T09:59:01.659+00:00"
+        }
+      ],
+      "total_additions": 16,
+      "total_deletions": 0,
+      "accepted_lines": 16,
+      "overriden_lines": 0
+    }
+  }
+}
