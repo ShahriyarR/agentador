@@ -161,12 +161,19 @@ class DeepAgentsAdapter:
             memory_sources = get_memory_sources()
             memory_kwargs = {"memory": memory_sources} if memory_sources else {}
 
+            # Skills support via .md files in skill directories
+            from agent_tui.services.deep_agents.skills import get_skill_sources
+
+            skill_sources = get_skill_sources()
+            skill_kwargs = {"skills": skill_sources} if skill_sources else {}
+
             self._agent = create_deep_agent(
                 model=model,
                 checkpointer=checkpointer,
                 backend=backend,
                 tools=tools,
                 **memory_kwargs,
+                **skill_kwargs,
             )
 
         return self._agent
@@ -354,36 +361,12 @@ class DeepAgentsAdapter:
         Returns:
             A list of skill dictionaries with name and description fields.
         """
-        if not self._deepagents_available:
-            return [
-                {
-                    "name": "search",
-                    "description": "Search the web for information",
-                },
-                {
-                    "name": "summarize",
-                    "description": "Summarize a document or URL",
-                },
-                {
-                    "name": "analyze",
-                    "description": "Analyze code or data",
-                },
-            ]
+        from agent_tui.services.deep_agents.skills import (
+            get_skill_sources,
+            list_available_skills,
+        )
 
-        return [
-            {
-                "name": "search",
-                "description": "Search the web for information",
-            },
-            {
-                "name": "summarize",
-                "description": "Summarize a document or URL",
-            },
-            {
-                "name": "analyze",
-                "description": "Analyze code or data",
-            },
-        ]
+        return list_available_skills(get_skill_sources())
 
     async def invoke_skill(self, name: str, args: str) -> None:
         """Invoke a skill by name.
