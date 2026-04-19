@@ -32,6 +32,35 @@ export OPENAI_API_KEY=sk-...
 uv run agent-tui --agent=deepagents
 ```
 
+## Web Interface
+
+### Start Web Server
+
+```bash
+# Start the web interface
+uv run agent-tui --web
+```
+
+Then open http://localhost:8000 in your browser.
+
+### Web Interface Features
+
+- **Projects**: Organize chats by project (working directory)
+- **Real-time Chat**: WebSocket-based streaming responses
+- **Tool Approval**: Interactive approval/rejection of tool calls
+- **Neobrutalist Design**: Bold, high-contrast UI
+
+### Development
+
+Build Tailwind CSS:
+```bash
+# Watch mode
+hatch run tailwind
+
+# Production build
+hatch run tailwind-build
+```
+
 ## Environment Variables
 
 | Variable | Required | Default | Description |
