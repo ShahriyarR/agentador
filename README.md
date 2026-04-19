@@ -37,8 +37,11 @@ uv run agent-tui --agent=deepagents
 ### Start Web Server
 
 ```bash
-# Start the web interface
+# Start the web interface with stub agent (default)
 uv run agent-tui --web
+
+# Start with DeepAgents backend (requires OPENAI_API_KEY)
+uv run agent-tui --web --agent=deepagents
 ```
 
 Then open http://localhost:8000 in your browser.
@@ -49,6 +52,8 @@ Then open http://localhost:8000 in your browser.
 - **Real-time Chat**: WebSocket-based streaming responses
 - **Tool Approval**: Interactive approval/rejection of tool calls
 - **Neobrutalist Design**: Bold, high-contrast UI
+- **Chat Management**: Rename chats, create new chats per project
+- **Skills Panel**: Access slash commands (⚡ button)
 
 ### Development
 
@@ -60,6 +65,17 @@ hatch run tailwind
 # Production build
 hatch run tailwind-build
 ```
+
+### Agent Backends
+
+The web interface supports two agent backends:
+
+| Backend | Command | Description |
+|---------|---------|-------------|
+| **Stub** | `--agent=stub` | Mock agent for testing (default) |
+| **DeepAgents** | `--agent=deepagents` | Full AI agent with tool use |
+
+**Note:** DeepAgents requires `OPENAI_API_KEY` to be set in your environment.
 
 ## Environment Variables
 
