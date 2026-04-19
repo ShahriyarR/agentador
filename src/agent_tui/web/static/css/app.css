@@ -43,7 +43,7 @@
   }
   
   .nb-sidebar {
-    @apply border-r-3 border-nb-black bg-nb-bg shadow-[-4px_0_0_0_#000000_inset];
+    @apply border-r-3 border-nb-black bg-nb-bg;
   }
   
   .nb-sidebar-item {
