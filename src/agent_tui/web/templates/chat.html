@@ -2,7 +2,7 @@
 
 {% block title %}Chat - Agent TUI Web{% endblock %}
 
-{% block alpine_data %}{chatApp, editingChatId: null, editingChatTitle: '', showRenameModal: false, showSkills: false, errorMessage: null, showError: false}{% endblock %}
+{% block alpine_data %}{...chatApp(), editingChatId: null, editingChatTitle: '', showRenameModal: false, showSkills: false, errorMessage: null, showError: false, showProjectModal: false}{% endblock %}
 
 {% block content %}
 <div class="h-full flex flex-col">
@@ -66,16 +66,14 @@
             {% if current_chat %}
             <div class="border-t-3 border-nb-black bg-nb-bg p-4">
                 <form x-ref="chatForm" 
-                      hx-post="/api/chat/{{ current_chat }}/stream"
-                      hx-swap="none"
-                      @submit.prevent="sendMessage()"
+                      @submit.prevent="sendMessage('{{ current_chat }}')"
                       class="flex gap-3">
                     <input type="text" 
                            x-model="message"
                            class="nb-input flex-1"
                            placeholder="Type your message..."
                            :disabled="isStreaming"
-                           @keydown.enter.prevent="sendMessage()">
+                           @keydown.enter.prevent="sendMessage('{{ current_chat }}')">
                     <button type="submit" 
                             class="nb-btn-primary"
                             :disabled="isStreaming || !message.trim()">
@@ -191,20 +189,24 @@
 
 <script>
 // WebSocket connection for real-time updates
-let ws = null;
+window.ws = null;
 
 function connectWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+    window.ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
     
-    ws.onmessage = function(event) {
+    window.ws.onmessage = function(event) {
         const data = JSON.parse(event.data);
         handleWebSocketMessage(data);
     };
     
-    ws.onclose = function() {
+    window.ws.onclose = function() {
         console.log('WebSocket closed, reconnecting...');
         setTimeout(connectWebSocket, 1000);
+    };
+    
+    window.ws.onerror = function(error) {
+        console.error('WebSocket error:', error);
     };
 }
 
@@ -214,7 +216,14 @@ function handleWebSocketMessage(data) {
             appendChunk(data.text);
             break;
         case 'message_end':
-            Alpine.store('chatApp').onStreamComplete();
+            // Find the Alpine component and call onStreamComplete
+            const el = document.querySelector('[x-data]');
+            if (el && el._x_dataStack) {
+                const component = el._x_dataStack[0];
+                if (component && component.onStreamComplete) {
+                    component.onStreamComplete();
+                }
+            }
             break;
         case 'tool_call':
             showToolApproval(data);
@@ -239,8 +248,8 @@ function showToolApproval(data) {
 }
 
 function approveTool(toolId, approved) {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
+    if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        window.ws.send(JSON.stringify({
             type: 'approve_tool',
             tool_id: toolId,
             approved: approved
@@ -254,13 +263,15 @@ function updateStatus(text) {
 
 function showError(message) {
     // Use Alpine.js to show error toast
-    const app = document.querySelector('[x-data]')._x_dataStack[0];
-    if (app) {
+    const el = document.querySelector('[x-data]');
+    if (el && el._x_dataStack && el._x_dataStack[0]) {
+        const app = el._x_dataStack[0];
         app.errorMessage = message;
         app.showError = true;
         // Auto-hide after 5 seconds
         setTimeout(() => { app.showError = false; }, 5000);
     } else {
+        console.error('Error:', message);
         alert('Error: ' + message);
     }
 }

@@ -21,15 +21,25 @@ document.addEventListener('alpine:init', () => {
       }
     },
     
-    async sendMessage() {
+    async sendMessage(chatId) {
       if (!this.message.trim() || this.isStreaming) return;
       
       this.isStreaming = true;
       const messageText = this.message;
       this.message = '';
       
-      // Trigger HTMX request
-      this.$refs.chatForm.dispatchEvent(new Event('submit'));
+      // Send via WebSocket
+      if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        window.ws.send(JSON.stringify({
+          type: 'chat',
+          message: messageText,
+          thread_id: chatId
+        }));
+      } else {
+        console.error('WebSocket not connected');
+        this.isStreaming = false;
+        alert('Not connected to server. Please refresh the page.');
+      }
     },
     
     onStreamComplete() {
