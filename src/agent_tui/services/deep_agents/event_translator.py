@@ -114,6 +114,8 @@ class EventTranslator:
         if name == "content_block_delta":
             content = data.get("data", {}).get("content", "")
             if content:
+                if not self._first_ai_content:
+                    self._first_ai_content = content
                 yield AgentEvent(
                     type=EventType.MESSAGE_CHUNK,
                     text=content,
