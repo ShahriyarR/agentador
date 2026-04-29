@@ -1,0 +1,23 @@
+README.md
+  4a838ebd0be2ac2e 53,55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "63419484f05aa4d91d06e89a850af50bf409401c",
+  "prompts": {
+    "4a838ebd0be2ac2e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_254d8d4b1ffehIjxSbIQ3bYSMS",
+        "model": "opencode-go/minimax-m2.7"
+      },
+      "human_author": "Shahriyar Rzayev",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 1,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
