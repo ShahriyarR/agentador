@@ -1,0 +1,36 @@
+src/agent_tui/entrypoints/web.py
+  4a838ebd0be2ac2e 51-56
+src/agent_tui/services/deep_agents/adapter.py
+  4a838ebd0be2ac2e 131-135
+src/agent_tui/services/web_adapter.py
+  4a838ebd0be2ac2e 31
+src/agent_tui/services/deep_agents/title.py
+  4a838ebd0be2ac2e 29-30,33-36
+src/agent_tui/services/deep_agents/event_translator.py
+  4a838ebd0be2ac2e 254,257-263,265,267
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "da994f4dc7f08e8a03bea6fa66d672ddb6445fcc",
+  "prompts": {
+    "4a838ebd0be2ac2e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_254d8d4b1ffehIjxSbIQ3bYSMS",
+        "model": "opencode-go/minimax-m2.7"
+      },
+      "human_author": "Shahriyar Rzayev",
+      "messages": [],
+      "total_additions": 50,
+      "total_deletions": 27,
+      "accepted_lines": 31,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_d1a0ff36e5926f": {
+      "author": "Shahriyar Rzayev"
+    }
+  }
+}
